@@ -4,7 +4,7 @@ import time
 # --- 1. Epic Hyperspace Advanced CSS Override ---
 st.set_page_config(layout="wide", page_title="Epic Hyperspace - Clinical Workspace", initial_sidebar_state="collapsed")
 
-st.html("""
+st.markdown("""
     <style>
     /* Force Epic desktop background and font */
     [data-testid="stAppViewContainer"] {
