@@ -65,7 +65,7 @@ button[kind="primary"] * {
     color: #ffffff !important;
 }
 
-/* Safe Streamlit Expander Styling */
+/* SAFE Streamlit Expander Styling - NO padding overrides! */
 [data-testid="stExpander"] {
     border: 1px solid #aaaaaa !important;
     border-radius: 3px !important;
@@ -74,16 +74,11 @@ button[kind="primary"] * {
     background-color: #ffffff !important;
 }
 [data-testid="stExpander"] summary {
-    background-color: #e2e6ea !important;
-    padding: 8px 12px !important;
+    background-color: #f0f2f5 !important;
 }
 [data-testid="stExpander"] summary p {
     color: #0056b3 !important;
     font-weight: bold !important;
-    font-size: 12px !important;
-}
-[data-testid="stExpanderDetails"] {
-    padding: 10px !important;
 }
 
 /* Dockable Workspace Windows */
@@ -193,7 +188,7 @@ Discharge Orders: Awaiting Signature
 </div>
 """, unsafe_allow_html=True)
             
-            # The fixed "Pop up bubble" for rationale
+            # The fixed "Pop up bubble" for rationale without broken padding
             with st.expander("💡 View Auto-Discontinue Rationale"):
                 st.markdown("""
                 <p style="font-size: 12px; color: #333333; margin: 0; padding: 5px;">
