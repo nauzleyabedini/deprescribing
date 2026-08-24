@@ -2,128 +2,71 @@ import streamlit as st
 import time
 
 # --- 1. Epic Hyperspace Advanced CSS Override ---
-st.set_page_config(layout="wide", page_title="Epic Hyperspace - Clinical Workspace", initial_sidebar_state="collapsed")
+st.set_page_config(layout="wide", page_title="Epic Hyperspace - Discharge Med Rec", initial_sidebar_state="collapsed")
 
 st.markdown("""
     <style>
-    /* Force Epic desktop background and font */
     [data-testid="stAppViewContainer"] {
         background-color: #d8dee3 !important;
         font-family: 'Tahoma', 'Segoe UI', Arial, sans-serif !important;
     }
-    
-    /* Global high-density desktop scaling */
     html, body, p, div, span, button, input, textarea {
         font-size: 12px !important;
         color: #111111 !important;
     }
-
     header {visibility: hidden;}
     [data-testid="stToolbar"] {display: none;}
 
-    /* ----------------------------------------------------------------
-       EPIC STORYBOARD BANNER (Top Patient Context)
-       ---------------------------------------------------------------- */
+    /* Storyboard Banner */
     .st-key-storyboard {
-        background-color: #1c2d42 !important; /* Epic Dark Navy */
+        background-color: #1c2d42 !important;
         color: #ffffff !important;
         padding: 6px 12px !important;
-        border-bottom: 3px solid #e07a5f !important; /* Epic Orange Accent */
+        border-bottom: 3px solid #e07a5f !important;
         margin-top: -55px;
         margin-bottom: 5px;
     }
-    .st-key-storyboard span, .st-key-storyboard p {
-        color: #ffffff !important;
-        font-weight: bold;
-    }
+    .st-key-storyboard span { color: #ffffff !important; font-weight: bold; }
 
-    /* ----------------------------------------------------------------
-       HYPERSPACE TAB NAVIGATION STRIP
-       ---------------------------------------------------------------- */
+    /* Hyperspace Tabs */
     .epic-tab-strip {
-        display: flex;
-        gap: 2px;
-        background-color: #d8dee3;
-        padding: 0px 5px;
-        border-bottom: 1px solid #9ba5b1;
-        margin-bottom: 8px;
+        display: flex; gap: 2px; background-color: #d8dee3; padding: 0px 5px; border-bottom: 1px solid #9ba5b1; margin-bottom: 8px;
     }
     .epic-tab {
-        background-color: #e2e7ec;
-        color: #333333;
-        padding: 4px 12px;
-        border: 1px solid #9ba5b1;
-        border-bottom: none;
-        border-radius: 3px 3px 0 0;
-        font-weight: normal;
+        background-color: #e2e7ec; color: #333333; padding: 4px 12px; border: 1px solid #9ba5b1; border-bottom: none; border-radius: 3px 3px 0 0;
     }
     .epic-tab-active {
-        background-color: #ffffff;
-        color: #1c2d42;
-        padding: 4px 14px;
-        border: 1px solid #9ba5b1;
-        border-bottom: 2px solid #ffffff;
-        border-radius: 3px 3px 0 0;
-        font-weight: bold;
+        background-color: #ffffff; color: #1c2d42; padding: 4px 14px; border: 1px solid #9ba5b1; border-bottom: 2px solid #ffffff; border-radius: 3px 3px 0 0; font-weight: bold;
     }
 
-    /* ----------------------------------------------------------------
-       DOCKABLE WORKSPACE WINDOWS (Panels)
-       ---------------------------------------------------------------- */
+    /* Dockable Workspace Windows */
     [class^="st-key-epic_window_"] {
-        background-color: #f8f9fa !important;
+        background-color: #ffffff !important;
         border: 1px solid #7b8896 !important;
         border-radius: 0px !important;
         padding: 0px !important;
         box-shadow: 2px 2px 5px rgba(0,0,0,0.15);
     }
-    
-    /* Epic Window Title Bars (Blue Header) */
     .epic-window-header {
         background: linear-gradient(to bottom, #336699, #204d74);
-        color: white !important;
-        font-weight: bold;
-        padding: 5px 8px;
-        text-transform: uppercase;
-        font-size: 11px !important;
-        letter-spacing: 0.5px;
-        border-bottom: 1px solid #122b40;
+        color: white !important; font-weight: bold; padding: 5px 8px; text-transform: uppercase; font-size: 11px !important; border-bottom: 1px solid #122b40;
     }
-    
-    .epic-window-body {
-        padding: 10px;
-        background-color: #ffffff;
-    }
+    .epic-window-body { padding: 10px; background-color: #ffffff; }
 
-    /* ----------------------------------------------------------------
-       CLINICAL ALERTS & TABLES
-       ---------------------------------------------------------------- */
+    /* Med Rec Table Styling */
+    .med-table { width: 100%; border-collapse: collapse; margin-bottom: 10px; font-size: 12px; }
+    .med-table th { background-color: #e8ecf1; border: 1px solid #9ba5b1; padding: 4px; text-align: left; }
+    .med-table td { border: 1px solid #9ba5b1; padding: 6px 4px; }
+    
     .epic-alert-box {
-        background-color: #fff9db;
-        border: 1px solid #f08c00;
-        border-left: 5px solid #f59f00;
-        padding: 8px;
-        margin-bottom: 10px;
+        background-color: #fff9db; border: 1px solid #f08c00; border-left: 5px solid #f59f00; padding: 8px; margin-bottom: 10px;
     }
     
-    /* Epic Desktop Form Buttons */
     .stButton>button {
-        background-color: #e6ebef !important;
-        border: 1px solid #7b8896 !important;
-        color: #222222 !important;
-        border-radius: 2px !important;
-        font-weight: bold !important;
-        padding: 3px 8px !important;
-        box-shadow: inset 0 1px 0 rgba(255,255,255,0.8);
-    }
-    .stButton>button:hover {
-        background-color: #d2dce5 !important;
-        border-color: #4a637d !important;
+        background-color: #e6ebef !important; border: 1px solid #7b8896 !important; color: #222222 !important; border-radius: 2px !important; font-weight: bold !important; padding: 3px 8px !important;
     }
     .stButton>button[kind="primary"] {
-        background-color: #204d74 !important;
-        color: white !important;
-        border-color: #122b40 !important;
+        background-color: #204d74 !important; color: white !important; border-color: #122b40 !important;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -143,86 +86,103 @@ st.markdown("""
     <div class="epic-tab">Chart Review</div>
     <div class="epic-tab">SnapShot</div>
     <div class="epic-tab">Notes</div>
-    <div class="epic-tab-active">Discharge Navigator</div>
-    <div class="epic-tab">Medications</div>
+    <div class="epic-tab-active">Discharge Navigator: Med Rec</div>
     <div class="epic-tab">Orders</div>
 </div>
 """, unsafe_allow_html=True)
 
-# --- 4. Three-Column Dockable Workspace Layout ---
-col1, col2, col3 = st.columns(spec=[1, 1.1, 1.3], gap="small")
+# Initialize session state for workflow trigger
+if "reconciled" not in st.session_state:
+    st.session_state.reconciled = False
 
-# ----- WINDOW 1: Patient Chart & Clinical Notes -----
+# --- 4. Workspace Layout ---
+col1, col2 = st.columns(spec=[1.3, 1.2], gap="small")
+
+# ----- WINDOW 1: Epic Discharge Med Rec Grid -----
 with col1:
     with st.container(key="epic_window_1"):
-        st.markdown('<div class="epic-window-header">Chart Review: Meds & Progress</div>', unsafe_allow_html=True)
+        st.markdown('<div class="epic-window-header">Discharge Medication Reconciliation Grid</div>', unsafe_allow_html=True)
         st.markdown('<div class="epic-window-body">', unsafe_allow_html=True)
         
-        st.markdown("**Home / Admission Meds:**")
-        st.code("• Lisinopril 10mg PO Daily\n• Metformin 500mg PO BID", language="text")
+        st.markdown("Review home and hospital medications prior to generating discharge prescriptions.")
         
-        st.markdown("**Active Inpatient Meds:**")
-        st.code("• Lisinopril 10mg PO Daily\n• Metformin 500mg PO BID\n• Quetiapine 25mg PO QHS *(Started HD#3)*", language="text")
+        # Simulate Epic Med Rec Table
+        st.markdown("""
+        <table class="med-table">
+            <tr>
+                <th>Medication</th>
+                <th>Admission Source</th>
+                <th>Hospital Course Action</th>
+                <th>Discharge Plan</th>
+            </tr>
+            <tr>
+                <td><strong>Lisinopril 10mg</strong> PO Daily</td>
+                <td>Home Med</td>
+                <td>Continued</td>
+                <td><span style="color:green; font-weight:bold;">[X] Continue</span></td>
+            </tr>
+            <tr>
+                <td><strong>Metformin 500mg</strong> PO BID</td>
+                <td>Home Med</td>
+                <td>Continued</td>
+                <td><span style="color:green; font-weight:bold;">[X] Continue</span></td>
+            </tr>
+            <tr style="background-color: #fdf2f2;">
+                <td><strong>Quetiapine 25mg</strong> PO QHS</td>
+                <td><em>New Inpatient Start (HD#3)</em></td>
+                <td>Active for Delirium</td>
+                <td><span style="color:red; font-weight:bold;">[X] Continue (Auto-selected)</span></td>
+            </tr>
+        </table>
+        """, unsafe_allow_html=True)
         
-        st.markdown("**Progress Note / Consults (HD#3):**")
-        st.text_area("Note Text", "HD#3: Patient extubated yesterday. Overnight, developed acute agitation, pulling at IV lines. CAM-ICU positive. Geriatrics consulted, recommended Quetiapine 25mg QHS PRN for hyperactive delirium. Pt calmer this morning.", height=130, disabled=True, label_visibility="collapsed")
-        
+        st.write("")
+        if not st.session_state.reconciled:
+            if st.button("Complete Med Rec & Sign Discharge Orders ⚡", type="primary", use_container_width=True):
+                with st.spinner("FHIR API querying EHR delta & LLM evaluating clinical chart context..."):
+                    time.sleep(1.5)
+                st.session_state.reconciled = True
+                st.rerun()
+        else:
+            st.success("Med Rec submitted. Intercept active.")
+            if st.button("Reset Simulation"):
+                st.session_state.reconciled = False
+                st.rerun()
+
         st.markdown('</div>', unsafe_allow_html=True)
 
-# ----- WINDOW 2: Qualified Health AI Engine -----
+# ----- WINDOW 2: Qualified Health Intercept & Pended Orders -----
 with col2:
     with st.container(key="epic_window_2"):
-        st.markdown('<div class="epic-window-header">Qualified Health: Background Engine</div>', unsafe_allow_html=True)
+        st.markdown('<div class="epic-window-header">Qualified Health: Decision Support & Pended Actions</div>', unsafe_allow_html=True)
         st.markdown('<div class="epic-window-body">', unsafe_allow_html=True)
         
-        st.write("Agent status: **Monitoring Discharge Tab**")
-        run_agent = st.button("Trigger AI Protocol ⚡")
-        
-        agent_output = st.empty()
-        
-        if run_agent:
-            with st.spinner("Executing FHIR cross-reference & NLP parse..."):
-                time.sleep(1.5)
-                simulated_response = {
-                    "FHIR_Delta": "Quetiapine 25mg added inpatient",
-                    "Indication_Verified": "Hyperactive ICU Delirium (HD#3)",
-                    "Chronic_History": "None (No Schizophrenia/Bipolar coded)",
-                    "Action_Recommended": "Safe to Deprescribe at Discharge",
-                    "SmartLink_Text": "Quetiapine 25mg was initiated for acute hyperactive delirium during ICU stay. As delirium has resolved, medication is discontinued prior to discharge."
-                }
-                agent_output.json(simulated_response)
-        else:
-            st.info("The agent runs silently in the background. Click button to simulate event.")
-            
-        st.markdown('</div>', unsafe_allow_html=True)
-
-# ----- WINDOW 3: Discharge Reconciliation Workflow -----
-with col3:
-    with st.container(key="epic_window_3"):
-        st.markdown('<div class="epic-window-header">Discharge Medication Reconciliation</div>', unsafe_allow_html=True)
-        st.markdown('<div class="epic-window-body">', unsafe_allow_html=True)
-        
-        if run_agent:
+        if st.session_state.reconciled:
             st.markdown("""
             <div class="epic-alert-box">
-                <strong>⚠️ QUALIFIED HEALTH DECISION SUPPORT</strong><br>
-                <strong>Quetiapine 25mg</strong> was flagged as an acute-care continuation without chronic indication. Risk of post-discharge falls & cognitive sedation.
+                <strong>⚠️ QUALIFIED HEALTH SMART-INTERCEPT</strong><br>
+                <strong>Safety Catch:</strong> You selected to continue <strong>Quetiapine 25mg</strong> at discharge. FHIR & chart review confirms this was started on HD#3 for <em>Hyperactive ICU Delirium</em>. No chronic psychiatric indication or taper plan found. Continuing this outpatient dramatically increases 30-day fall risk.
             </div>
             """, unsafe_allow_html=True)
             
-            st.markdown("**Discharge Action Selection:**")
+            st.markdown("**Recommended Epic Order Adjustments:**")
             
-            action_btn1, action_btn2 = st.columns(2)
-            with action_btn1:
+            c1, c2 = st.columns(2)
+            with c1:
                 if st.button("Accept: Pend Discontinue", type="primary", use_container_width=True):
-                    st.success("Order pended: Discontinue Quetiapine.")
-            with action_btn2:
-                if st.button("Reject: Keep Active", use_container_width=True):
-                    st.warning("Flag cleared. Routed to Clinical Pharmacist.")
+                    st.success("Quetiapine order changed to 'Discontinue'.")
+            with c2:
+                if st.button("Override: Keep Active", use_container_width=True):
+                    st.warning("Override logged. Routing notification to Clinical Pharmacist.")
             
-            st.markdown("<br>**Discharge Summary Addendum (SmartText):**", unsafe_allow_html=True)
-            st.text_area("Summary Box", value=simulated_response['SmartLink_Text'], height=90, label_visibility="collapsed")
+            st.markdown("<br><strong>SmartText: Discharge Summary Addendum</strong>", unsafe_allow_html=True)
+            st.text_area(
+                "Summary Addendum", 
+                value="Quetiapine 25mg was initiated during the hospitalization for acute hyperactive delirium in the setting of sepsis. As the delirium has fully resolved and cognitive baseline is regained, this medication has been discontinued prior to discharge to mitigate fall risks.",
+                height=110,
+                label_visibility="collapsed"
+            )
         else:
-            st.markdown("<p style='color: #666; font-style: italic;'>Awaiting background evaluation results...</p>", unsafe_allow_html=True)
+            st.info("Awaiting Med Rec submission... Click 'Complete Med Rec' on the left to trigger the AI safety intercept.")
             
         st.markdown('</div>', unsafe_allow_html=True)
