@@ -34,10 +34,9 @@ header {visibility: hidden;}
     border: 1px solid #999999 !important; padding: 8px 6px; color: #000000 !important;
 }
 
-/* Alert Box */
-.alert-box {
-    background-color: #fff4ce !important; border: 1px solid #d39e00 !important; border-left: 6px solid #d39e00 !important;
-    padding: 10px !important; margin-bottom: 15px !important; color: #000000 !important; font-size: 13px !important;
+/* Pended Order Box */
+.pended-order {
+    border: 1px solid #aaaaaa; background-color: #f8f9fa; padding: 10px; border-radius: 3px; margin-bottom: 5px;
 }
 
 /* Buttons */
@@ -47,6 +46,15 @@ header {visibility: hidden;}
 }
 .stButton>button[kind="primary"] {
     background-color: #204d74 !important; color: #ffffff !important; border-color: #122b40 !important;
+}
+
+/* Streamlit Expander overriding to look like an Epic link */
+.streamlit-expanderHeader {
+    font-size: 12px !important;
+    color: #0056b3 !important;
+    background-color: #ffffff !important;
+    border: none !important;
+    padding: 0 !important;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -115,57 +123,67 @@ Discharge Medication Reconciliation Grid
     
     st.write("") 
     if not st.session_state.reconciled:
-        if st.button("Complete Med Rec & Sign Orders ⚡", type="primary", use_container_width=True):
-            with st.spinner("FHIR API querying EHR delta & LLM evaluating clinical chart context..."):
+        if st.button("Complete Med Rec & Continue to Orders ⚡", type="primary", use_container_width=True):
+            with st.spinner("Processing reconciliation..."):
                 time.sleep(1.5)
             st.session_state.reconciled = True
             st.rerun()
     else:
-        st.success("Med Rec submitted. Intercept active.")
+        st.success("Med Rec submitted.")
         if st.button("Reset Simulation"):
             st.session_state.reconciled = False
             st.rerun()
             
     st.markdown("""</div>""", unsafe_allow_html=True) 
 
-# ----- WINDOW 2: Qualified Health Intercept & Pended Orders -----
+# ----- WINDOW 2: Discharge Orders (Silent Intercept) -----
 with col2:
     st.markdown("""
 <div style="background-color: #c9d6e2; color: #000000; font-weight: bold; padding: 8px 12px; border: 1px solid #888888; border-bottom: none; font-size: 13px; text-transform: uppercase;">
-Qualified Health: Decision Support & Pended Actions
+Discharge Orders: Awaiting Signature
 </div>
 <div style="background-color: #ffffff; border: 1px solid #888888; padding: 15px; min-height: 400px;">
 """, unsafe_allow_html=True)
     
     if st.session_state.reconciled:
         st.markdown("""
-<div class="alert-box">
-<strong style="color: #990000 !important; font-size: 14px;">⚠️ QUALIFIED HEALTH SMART-INTERCEPT</strong><br><br>
-<strong style="color: #000000 !important;">Safety Catch:</strong> You selected to continue <strong>Quetiapine 25mg</strong> at discharge. FHIR & chart review confirms this was started on HD#3 for <em>Hyperactive ICU Delirium</em>. No chronic psychiatric indication or taper plan found. Continuing this outpatient dramatically increases 30-day fall risk.
+<p style="color: #006600; font-weight: bold; font-size: 13px; margin-bottom: 5px;">1 Order Pended for Review</p>
+<div class="pended-order">
+    <p style="margin: 0; font-size: 13px; font-weight: bold;">
+        <span style="color: #aa0000; text-decoration: line-through;">Quetiapine (SEROQUEL) 25mg Tablet</span>
+    </p>
+    <p style="margin: 0; font-size: 12px; color: #333333;"><strong>Action:</strong> <span style="color: #aa0000; font-weight: bold;">Discontinue</span></p>
+    <p style="margin: 0; font-size: 11px; color: #666666;">Route: Oral | Frequency: Nightly</p>
 </div>
-<p style="color: #000000 !important; font-weight: bold; font-size: 13px;">Recommended Epic Order Adjustments:</p>
 """, unsafe_allow_html=True)
         
-        c1, c2 = st.columns(2)
-        with c1:
-            if st.button("Accept: Pend Discontinue", type="primary", use_container_width=True):
-                st.success("Order pended: Discontinue Quetiapine 25mg.")
-        with c2:
-            if st.button("Override: Keep Active", use_container_width=True):
-                st.warning("Override logged. Routing notification to Clinical Pharmacist.")
-        
+        # The subtle "Pop up bubble" for rationale
+        with st.expander("💡 View Auto-Discontinue Rationale"):
+            st.markdown("""
+            <p style="font-size: 12px; color: #333333; margin: 0; padding: 5px;">
+            <strong>Qualified Health AI:</strong> Chart review confirms this medication was initiated on HD#3 for <em>Hyperactive ICU Delirium</em>. No chronic psychiatric indication or taper plan was found in prior FHIR history. This medication was auto-pended for discontinuation to mitigate 30-day post-discharge fall risk.
+            </p>
+            """, unsafe_allow_html=True)
+            if st.button("Undo & Keep Active (Route to Pharmacy)", key="undo_btn"):
+                st.warning("Order restored. Routing to unit pharmacist.")
+
         st.markdown("""
-<div style="margin-top: 20px;">
+<hr style="margin: 15px 0; border: 0; border-top: 1px solid #dddddd;">
 <p style="color: #000000 !important; font-weight: bold; font-size: 13px; margin-bottom: 5px;">SmartText: Discharge Summary Addendum</p>
-</div>
 """, unsafe_allow_html=True)
+        
         st.text_area(
             "Summary Addendum", 
             value="Quetiapine 25mg was initiated during the hospitalization for acute hyperactive delirium in the setting of sepsis. As the delirium has fully resolved and cognitive baseline is regained, this medication has been discontinued prior to discharge to mitigate fall risks.",
-            height=110,
+            height=90,
             label_visibility="collapsed"
         )
+        
+        st.write("")
+        if st.button("Sign Orders & Close Encounter", type="primary", use_container_width=True):
+            st.success("Orders signed successfully. Discharge Summary updated.")
+            
     else:
-        st.info("Awaiting Med Rec submission... Click 'Complete Med Rec' on the left to trigger the AI safety intercept.")
+        st.info("Awaiting Med Rec submission... Complete the grid on the left to generate discharge orders.")
         
     st.markdown("""</div>""", unsafe_allow_html=True)
