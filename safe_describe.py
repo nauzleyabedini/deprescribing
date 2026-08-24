@@ -47,10 +47,22 @@ st.markdown("""
         padding: 0px !important;
         box-shadow: 2px 2px 5px rgba(0,0,0,0.15);
     }
+    
+    /* High Contrast Epic Window Title Bars (White text on Deep Blue) */
     .epic-window-header {
         background: linear-gradient(to bottom, #336699, #204d74);
-        color: white !important; font-weight: bold; padding: 5px 8px; text-transform: uppercase; font-size: 11px !important; border-bottom: 1px solid #122b40;
+        color: #ffffff !important; 
+        font-weight: bold; 
+        padding: 6px 8px; 
+        text-transform: uppercase; 
+        font-size: 11px !important; 
+        letter-spacing: 0.5px;
+        border-bottom: 1px solid #122b40;
     }
+    .epic-window-header span, .epic-window-header div {
+        color: #ffffff !important;
+    }
+    
     .epic-window-body { padding: 10px; background-color: #ffffff; }
 
     /* Med Rec Table Styling */
@@ -170,7 +182,7 @@ with col2:
             c1, c2 = st.columns(2)
             with c1:
                 if st.button("Accept: Pend Discontinue", type="primary", use_container_width=True):
-                    st.success("Quetiapine order changed to 'Discontinue'.")
+                    st.success("Order pended: Discontinue Quetiapine 25mg.")
             with c2:
                 if st.button("Override: Keep Active", use_container_width=True):
                     st.warning("Override logged. Routing notification to Clinical Pharmacist.")
