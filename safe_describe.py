@@ -11,8 +11,7 @@ st.markdown("""
         font-family: 'Tahoma', 'Segoe UI', Arial, sans-serif !important;
     }
     
-    /* Global layout text */
-    html, body, p, div, span:not(.force-white), input, textarea {
+    html, body, p, div, span, input, textarea {
         font-size: 12px !important;
         color: #111111 !important;
     }
@@ -101,8 +100,8 @@ col1, col2 = st.columns(spec=[1.3, 1.2], gap="small")
 with col1:
     with st.container(key="epic_window_1"):
         st.markdown(
-            '<div style="background: linear-gradient(to bottom, #336699, #204d74); padding: 6px 8px; border-bottom: 1px solid #122b40;">'
-            '<span class="force-white" style="color: #ffffff !important; font-weight: bold !important; text-transform: uppercase; font-size: 11px;">Discharge Medication Reconciliation Grid</span>'
+            '<div style="background: linear-gradient(to bottom, #d6e4f0, #b9d2e8); padding: 6px 8px; border-bottom: 1px solid #9ba5b1;">'
+            '<span style="color: #122b40 !important; font-weight: bold !important; text-transform: uppercase; font-size: 11px;">Discharge Medication Reconciliation Grid</span>'
             '</div>', 
             unsafe_allow_html=True
         )
@@ -159,8 +158,8 @@ with col1:
 with col2:
     with st.container(key="epic_window_2"):
         st.markdown(
-            '<div style="background: linear-gradient(to bottom, #336699, #204d74); padding: 6px 8px; border-bottom: 1px solid #122b40;">'
-            '<span class="force-white" style="color: #ffffff !important; font-weight: bold !important; text-transform: uppercase; font-size: 11px;">Qualified Health: Decision Support & Pended Actions</span>'
+            '<div style="background: linear-gradient(to bottom, #d6e4f0, #b9d2e8); padding: 6px 8px; border-bottom: 1px solid #9ba5b1;">'
+            '<span style="color: #122b40 !important; font-weight: bold !important; text-transform: uppercase; font-size: 11px;">Qualified Health: Decision Support & Pended Actions</span>'
             '</div>', 
             unsafe_allow_html=True
         )
