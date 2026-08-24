@@ -10,7 +10,9 @@ st.markdown("""
         background-color: #d8dee3 !important;
         font-family: 'Tahoma', 'Segoe UI', Arial, sans-serif !important;
     }
-    html, body, p, div, span, button, input, textarea {
+    
+    /* Global layout text */
+    html, body, p, div, span:not(.force-white), input, textarea {
         font-size: 12px !important;
         color: #111111 !important;
     }
@@ -98,7 +100,12 @@ col1, col2 = st.columns(spec=[1.3, 1.2], gap="small")
 # ----- WINDOW 1: Epic Discharge Med Rec Grid -----
 with col1:
     with st.container(key="epic_window_1"):
-        st.markdown('''<div style="background: linear-gradient(to bottom, #336699, #204d74); color: white; font-weight: bold; padding: 6px 8px; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px; border-bottom: 1px solid #122b40;">Discharge Medication Reconciliation Grid</div>''', unsafe_allow_html=True)
+        st.markdown(
+            '<div style="background: linear-gradient(to bottom, #336699, #204d74); padding: 6px 8px; border-bottom: 1px solid #122b40;">'
+            '<span class="force-white" style="color: #ffffff !important; font-weight: bold !important; text-transform: uppercase; font-size: 11px;">Discharge Medication Reconciliation Grid</span>'
+            '</div>', 
+            unsafe_allow_html=True
+        )
         st.markdown('<div class="epic-window-body">', unsafe_allow_html=True)
         
         st.markdown("Review home and hospital medications prior to generating discharge prescriptions.")
@@ -151,7 +158,12 @@ with col1:
 # ----- WINDOW 2: Qualified Health Intercept & Pended Orders -----
 with col2:
     with st.container(key="epic_window_2"):
-        st.markdown('''<div style="background: linear-gradient(to bottom, #336699, #204d74); color: white; font-weight: bold; padding: 6px 8px; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px; border-bottom: 1px solid #122b40;">Qualified Health: Decision Support & Pended Actions</div>''', unsafe_allow_html=True)
+        st.markdown(
+            '<div style="background: linear-gradient(to bottom, #336699, #204d74); padding: 6px 8px; border-bottom: 1px solid #122b40;">'
+            '<span class="force-white" style="color: #ffffff !important; font-weight: bold !important; text-transform: uppercase; font-size: 11px;">Qualified Health: Decision Support & Pended Actions</span>'
+            '</div>', 
+            unsafe_allow_html=True
+        )
         st.markdown('<div class="epic-window-body">', unsafe_allow_html=True)
         
         if st.session_state.reconciled:
