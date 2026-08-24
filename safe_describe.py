@@ -4,10 +4,10 @@ import time
 # --- 1. Basic Setup ---
 st.set_page_config(layout="wide", page_title="Epic Hyperspace - Discharge Med Rec", initial_sidebar_state="collapsed")
 
-# Injecting CSS to absolutely force a light theme and high contrast
+# Injecting CSS for a purely Light-Themed Epic UI
 st.markdown("""
     <style>
-    /* Force Light Mode App Background */
+    /* Force Light Gray App Background */
     .stApp, [data-testid="stAppViewContainer"] {
         background-color: #e2e6ea !important;
     }
@@ -15,6 +15,7 @@ st.markdown("""
     /* Global text overrides */
     html, body, p, div, span, label, li {
         font-family: 'Tahoma', 'Segoe UI', Arial, sans-serif !important;
+        color: #000000 !important;
     }
     
     header {visibility: hidden;}
@@ -26,8 +27,8 @@ st.markdown("""
         background-color: #ffffff;
     }
     .epic-table th {
-        background-color: #d0d7de !important; color: #000000 !important; 
-        border: 1px solid #777777 !important; padding: 6px; text-align: left; font-weight: bold;
+        background-color: #e2e6ea !important; color: #000000 !important; 
+        border: 1px solid #999999 !important; padding: 6px; text-align: left; font-weight: bold;
     }
     .epic-table td {
         border: 1px solid #999999 !important; padding: 8px 6px; color: #000000 !important;
@@ -45,7 +46,7 @@ st.markdown("""
         border-radius: 2px !important; font-weight: bold !important; padding: 4px 10px !important;
     }
     .stButton>button[kind="primary"] {
-        background-color: #0056b3 !important; color: #ffffff !important; border-color: #004085 !important;
+        background-color: #204d74 !important; color: #ffffff !important; border-color: #122b40 !important;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -54,19 +55,19 @@ st.markdown("""
 if "reconciled" not in st.session_state:
     st.session_state.reconciled = False
 
-# --- 2. Storyboard Top Banner (Inline Styles to guarantee contrast) ---
+# --- 2. Storyboard Top Banner (Light Steel Blue) ---
 st.markdown("""
-<div style="background-color: #003366; padding: 10px 15px; border-bottom: 4px solid #d9534f; margin-top: -50px; margin-bottom: 10px; border-radius: 3px;">
-    <span style="color: #ffffff !important; font-weight: bold; font-size: 14px; margin-right: 20px;">DOE, JOHN (M, 78 yo)</span>
-    <span style="color: #ffffff !important; font-size: 13px; margin-right: 20px;">MRN: 9482011</span>
-    <span style="color: #ffffff !important; font-size: 13px; margin-right: 20px;">DOB: 11/20/1947</span>
-    <span style="color: #ffffff !important; font-size: 13px; margin-right: 20px;">Bed: MS-4 312-2</span>
-    <span style="color: #ffffff !important; font-size: 13px; margin-right: 20px;">Code: Full Code</span>
-    <span style="color: #ffffff !important; font-size: 13px;">Allergies: <span style="color: #ffb3b3 !important; font-weight: bold;">Penicillin</span></span>
+<div style="background-color: #b9c9d9; padding: 10px 15px; border-bottom: 4px solid #d9534f; margin-top: -50px; margin-bottom: 10px; border-radius: 3px; color: #000000;">
+    <span style="font-weight: bold; font-size: 14px; margin-right: 20px;">DOE, JOHN (M, 78 yo)</span>
+    <span style="font-size: 13px; margin-right: 20px;">MRN: 9482011</span>
+    <span style="font-size: 13px; margin-right: 20px;">DOB: 11/20/1947</span>
+    <span style="font-size: 13px; margin-right: 20px;">Bed: MS-4 312-2</span>
+    <span style="font-size: 13px; margin-right: 20px;">Code: Full Code</span>
+    <span style="font-size: 13px;">Allergies: <span style="color: #cc0000; font-weight: bold;">Penicillin</span></span>
 </div>
 """, unsafe_allow_html=True)
 
-# --- 3. Hyperspace Navigation Tabs (Inline Styles) ---
+# --- 3. Hyperspace Navigation Tabs ---
 st.markdown("""
 <div style="display: flex; gap: 4px; padding: 0 10px; border-bottom: 2px solid #aaaaaa; margin-bottom: 15px;">
     <div style="background-color: #e2e6ea; color: #333333; padding: 6px 15px; border: 1px solid #aaaaaa; border-bottom: none; border-radius: 4px 4px 0 0; font-size: 13px;">Chart Review</div>
@@ -82,7 +83,7 @@ col1, spacer, col2 = st.columns([1.2, 0.05, 1.2])
 # ----- WINDOW 1: Epic Discharge Med Rec Grid -----
 with col1:
     st.markdown("""
-    <div style="background-color: #d0d7de; color: #000000; font-weight: bold; padding: 8px 12px; border: 1px solid #888888; border-bottom: none; font-size: 13px; text-transform: uppercase;">
+    <div style="background-color: #c9d6e2; color: #000000; font-weight: bold; padding: 8px 12px; border: 1px solid #888888; border-bottom: none; font-size: 13px; text-transform: uppercase;">
         Discharge Medication Reconciliation Grid
     </div>
     <div style="background-color: #ffffff; border: 1px solid #888888; padding: 15px; min-height: 400px;">
@@ -130,7 +131,7 @@ with col1:
 # ----- WINDOW 2: Qualified Health Intercept & Pended Orders -----
 with col2:
     st.markdown("""
-    <div style="background-color: #d0d7de; color: #000000; font-weight: bold; padding: 8px 12px; border: 1px solid #888888; border-bottom: none; font-size: 13px; text-transform: uppercase;">
+    <div style="background-color: #c9d6e2; color: #000000; font-weight: bold; padding: 8px 12px; border: 1px solid #888888; border-bottom: none; font-size: 13px; text-transform: uppercase;">
         Qualified Health: Decision Support & Pended Actions
     </div>
     <div style="background-color: #ffffff; border: 1px solid #888888; padding: 15px; min-height: 400px;">
