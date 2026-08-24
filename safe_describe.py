@@ -39,22 +39,60 @@ header {visibility: hidden;}
     border: 1px solid #aaaaaa; background-color: #f8f9fa; padding: 10px; border-radius: 3px; margin-bottom: 5px;
 }
 
-/* Buttons */
-.stButton>button {
-    background-color: #f0f2f5 !important; border: 1px solid #555555 !important; color: #000000 !important; 
-    border-radius: 2px !important; font-weight: bold !important; padding: 4px 10px !important;
-}
-.stButton>button[kind="primary"] {
-    background-color: #204d74 !important; color: #ffffff !important; border-color: #122b40 !important;
+/* Base Button Styling */
+button {
+    border-radius: 2px !important; 
+    font-weight: bold !important; 
+    padding: 4px 10px !important;
 }
 
-/* Streamlit Expander overriding to look like an Epic link */
-.streamlit-expanderHeader {
-    font-size: 12px !important;
-    color: #0056b3 !important;
+/* Secondary Button (Gray/Black) */
+button[kind="secondary"] {
+    background-color: #f0f2f5 !important; 
+    border: 1px solid #555555 !important; 
+}
+button[kind="secondary"] * {
+    color: #000000 !important;
+}
+
+/* Primary Button (Deep Blue/White) */
+button[kind="primary"] {
+    background-color: #204d74 !important; 
+    border-color: #122b40 !important;
+}
+/* FORCE all elements inside primary button to be white */
+button[kind="primary"] * {
+    color: #ffffff !important;
+}
+
+/* Safe Streamlit Expander Styling */
+[data-testid="stExpander"] {
+    border: 1px solid #aaaaaa !important;
+    border-radius: 3px !important;
+    margin-top: 5px;
+    margin-bottom: 10px;
     background-color: #ffffff !important;
-    border: none !important;
-    padding: 0 !important;
+}
+[data-testid="stExpander"] summary {
+    background-color: #e2e6ea !important;
+    padding: 8px 12px !important;
+}
+[data-testid="stExpander"] summary p {
+    color: #0056b3 !important;
+    font-weight: bold !important;
+    font-size: 12px !important;
+}
+[data-testid="stExpanderDetails"] {
+    padding: 10px !important;
+}
+
+/* Dockable Workspace Windows */
+[class^="st-key-epic_window_"] {
+    background-color: #ffffff !important;
+    border: 1px solid #888888 !important;
+    border-radius: 0px !important;
+    padding: 15px !important;
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.15);
 }
 </style>
 """, unsafe_allow_html=True)
@@ -90,11 +128,11 @@ col1, spacer, col2 = st.columns([1.2, 0.05, 1.2])
 
 # ----- WINDOW 1: Epic Discharge Med Rec Grid -----
 with col1:
-    st.markdown("""
-<div style="background-color: #c9d6e2; color: #000000; font-weight: bold; padding: 8px 12px; border: 1px solid #888888; border-bottom: none; font-size: 13px; text-transform: uppercase;">
+    with st.container(key="epic_window_1"):
+        st.markdown("""
+<div style="background-color: #c9d6e2; color: #000000; font-weight: bold; padding: 8px 12px; border-bottom: 1px solid #888888; font-size: 13px; text-transform: uppercase; margin: -15px -15px 15px -15px;">
 Discharge Medication Reconciliation Grid
 </div>
-<div style="background-color: #ffffff; border: 1px solid #888888; padding: 15px; min-height: 400px;">
 <p style="color: #000000; font-size: 13px; margin-top: 0;">Review home and hospital medications prior to generating discharge prescriptions.</p>
 
 <table class="epic-table">
@@ -120,33 +158,31 @@ Discharge Medication Reconciliation Grid
 </tr>
 </table>
 """, unsafe_allow_html=True)
-    
-    st.write("") 
-    if not st.session_state.reconciled:
-        if st.button("Complete Med Rec & Continue to Orders ⚡", type="primary", use_container_width=True):
-            with st.spinner("Processing reconciliation..."):
-                time.sleep(1.5)
-            st.session_state.reconciled = True
-            st.rerun()
-    else:
-        st.success("Med Rec submitted.")
-        if st.button("Reset Simulation"):
-            st.session_state.reconciled = False
-            st.rerun()
-            
-    st.markdown("""</div>""", unsafe_allow_html=True) 
+        
+        st.write("") 
+        if not st.session_state.reconciled:
+            if st.button("Complete Med Rec & Continue to Orders ⚡", type="primary", use_container_width=True):
+                with st.spinner("Processing reconciliation..."):
+                    time.sleep(1.5)
+                st.session_state.reconciled = True
+                st.rerun()
+        else:
+            st.success("Med Rec submitted.")
+            if st.button("Reset Simulation"):
+                st.session_state.reconciled = False
+                st.rerun()
 
 # ----- WINDOW 2: Discharge Orders (Silent Intercept) -----
 with col2:
-    st.markdown("""
-<div style="background-color: #c9d6e2; color: #000000; font-weight: bold; padding: 8px 12px; border: 1px solid #888888; border-bottom: none; font-size: 13px; text-transform: uppercase;">
+    with st.container(key="epic_window_2"):
+        st.markdown("""
+<div style="background-color: #c9d6e2; color: #000000; font-weight: bold; padding: 8px 12px; border-bottom: 1px solid #888888; font-size: 13px; text-transform: uppercase; margin: -15px -15px 15px -15px;">
 Discharge Orders: Awaiting Signature
 </div>
-<div style="background-color: #ffffff; border: 1px solid #888888; padding: 15px; min-height: 400px;">
 """, unsafe_allow_html=True)
-    
-    if st.session_state.reconciled:
-        st.markdown("""
+        
+        if st.session_state.reconciled:
+            st.markdown("""
 <p style="color: #006600; font-weight: bold; font-size: 13px; margin-bottom: 5px;">1 Order Pended for Review</p>
 <div class="pended-order">
     <p style="margin: 0; font-size: 13px; font-weight: bold;">
@@ -156,34 +192,32 @@ Discharge Orders: Awaiting Signature
     <p style="margin: 0; font-size: 11px; color: #666666;">Route: Oral | Frequency: Nightly</p>
 </div>
 """, unsafe_allow_html=True)
-        
-        # The subtle "Pop up bubble" for rationale
-        with st.expander("💡 View Auto-Discontinue Rationale"):
-            st.markdown("""
-            <p style="font-size: 12px; color: #333333; margin: 0; padding: 5px;">
-            <strong>Qualified Health AI:</strong> Chart review confirms this medication was initiated on HD#3 for <em>Hyperactive ICU Delirium</em>. No chronic psychiatric indication or taper plan was found in prior FHIR history. This medication was auto-pended for discontinuation to mitigate 30-day post-discharge fall risk.
-            </p>
-            """, unsafe_allow_html=True)
-            if st.button("Undo & Keep Active (Route to Pharmacy)", key="undo_btn"):
-                st.warning("Order restored. Routing to unit pharmacist.")
+            
+            # The fixed "Pop up bubble" for rationale
+            with st.expander("💡 View Auto-Discontinue Rationale"):
+                st.markdown("""
+                <p style="font-size: 12px; color: #333333; margin: 0; padding: 5px;">
+                <strong>Qualified Health AI:</strong> Chart review confirms this medication was initiated on HD#3 for <em>Hyperactive ICU Delirium</em>. No chronic psychiatric indication or taper plan was found in prior FHIR history. This medication was auto-pended for discontinuation to mitigate 30-day post-discharge fall risk.
+                </p>
+                """, unsafe_allow_html=True)
+                if st.button("Undo & Keep Active (Route to Pharmacy)", key="undo_btn"):
+                    st.warning("Order restored. Routing to unit pharmacist.")
 
-        st.markdown("""
+            st.markdown("""
 <hr style="margin: 15px 0; border: 0; border-top: 1px solid #dddddd;">
 <p style="color: #000000 !important; font-weight: bold; font-size: 13px; margin-bottom: 5px;">SmartText: Discharge Summary Addendum</p>
 """, unsafe_allow_html=True)
-        
-        st.text_area(
-            "Summary Addendum", 
-            value="Quetiapine 25mg was initiated during the hospitalization for acute hyperactive delirium in the setting of sepsis. As the delirium has fully resolved and cognitive baseline is regained, this medication has been discontinued prior to discharge to mitigate fall risks.",
-            height=90,
-            label_visibility="collapsed"
-        )
-        
-        st.write("")
-        if st.button("Sign Orders & Close Encounter", type="primary", use_container_width=True):
-            st.success("Orders signed successfully. Discharge Summary updated.")
             
-    else:
-        st.info("Awaiting Med Rec submission... Complete the grid on the left to generate discharge orders.")
-        
-    st.markdown("""</div>""", unsafe_allow_html=True)
+            st.text_area(
+                "Summary Addendum", 
+                value="Quetiapine 25mg was initiated during the hospitalization for acute hyperactive delirium in the setting of sepsis. As the delirium has fully resolved and cognitive baseline is regained, this medication has been discontinued prior to discharge to mitigate fall risks.",
+                height=90,
+                label_visibility="collapsed"
+            )
+            
+            st.write("")
+            if st.button("Sign Orders & Close Encounter", type="primary", use_container_width=True):
+                st.success("Orders signed successfully. Discharge Summary updated.")
+                
+        else:
+            st.info("Awaiting Med Rec submission... Complete the grid on the left to generate discharge orders.")
