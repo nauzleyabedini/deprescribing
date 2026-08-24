@@ -98,9 +98,11 @@ button[kind="primary"] * {
 </style>
 """, unsafe_allow_html=True)
 
-# Initialize session state for workflow trigger
+# Initialize session state for workflow trigger & dynamic UI state
 if "reconciled" not in st.session_state:
     st.session_state.reconciled = False
+if "quetiapine_status" not in st.session_state:
+    st.session_state.quetiapine_status = "discontinued"
 
 # --- 2. Storyboard Top Banner (Light Steel Blue) ---
 st.markdown("""
@@ -166,14 +168,16 @@ Discharge Medication Reconciliation Grid
                 with st.spinner("Processing reconciliation..."):
                     time.sleep(1.5)
                 st.session_state.reconciled = True
+                st.session_state.quetiapine_status = "discontinued" # Default state on submission
                 st.rerun()
         else:
             st.success("Med Rec submitted.")
             if st.button("Reset Simulation"):
                 st.session_state.reconciled = False
+                st.session_state.quetiapine_status = "discontinued"
                 st.rerun()
 
-# ----- WINDOW 2: Discharge Orders (Silent Intercept) -----
+# ----- WINDOW 2: Discharge Orders (Silent Intercept & Override Branching) -----
 with col2:
     with st.container(key="epic_window_2"):
         st.markdown("""
@@ -183,7 +187,10 @@ Discharge Orders: Awaiting Signature
 """, unsafe_allow_html=True)
         
         if st.session_state.reconciled:
-            st.markdown("""
+            
+            # --- BRANCH 1: AI Defaults to Discontinue (No override yet) ---
+            if st.session_state.quetiapine_status == "discontinued":
+                st.markdown("""
 <p style="color: #006600; font-weight: bold; font-size: 13px; margin-bottom: 5px;">1 Order Pended for Review</p>
 <div class="pended-order">
     <p style="margin: 0; font-size: 13px; font-weight: bold;">
@@ -193,17 +200,41 @@ Discharge Orders: Awaiting Signature
     <p style="margin: 0; font-size: 11px; color: #666666;">Route: Oral | Frequency: Nightly</p>
 </div>
 """, unsafe_allow_html=True)
-            
-            # The rationale expander - icon will now render correctly
-            with st.expander("💡 View Auto-Discontinue Rationale"):
-                st.markdown("""
-                <p style="font-size: 12px; color: #333333; margin: 0; padding: 5px;">
-                <strong>Qualified Health AI:</strong> Chart review confirms this medication was initiated on HD#3 for <em>Hyperactive ICU Delirium</em>. No chronic psychiatric indication or taper plan was found in prior FHIR history. This medication was auto-pended for discontinuation to mitigate 30-day post-discharge fall risk.
-                </p>
-                """, unsafe_allow_html=True)
-                if st.button("Undo & Keep Active (Route to Pharmacy)", key="undo_btn"):
-                    st.warning("Order restored. Routing to unit pharmacist.")
+                
+                with st.expander("💡 View Auto-Discontinue Rationale"):
+                    st.markdown("""
+                    <p style="font-size: 12px; color: #333333; margin: 0; padding: 5px;">
+                    <strong>Qualified Health AI:</strong> Chart review confirms this medication was initiated on HD#3 for <em>Hyperactive ICU Delirium</em>. No chronic psychiatric indication or taper plan was found in prior FHIR history. This medication was auto-pended for discontinuation to mitigate 30-day post-discharge fall risk.
+                    </p>
+                    """, unsafe_allow_html=True)
+                    
+                    if st.button("Undo & Keep Active (Route to Pharmacy)", key="undo_btn"):
+                        st.session_state.quetiapine_status = "kept"
+                        st.rerun()
 
+                addendum_text = "Quetiapine 25mg was initiated during the hospitalization for acute hyperactive delirium in the setting of sepsis. As the delirium has fully resolved and cognitive baseline is regained, this medication has been discontinued prior to discharge to mitigate fall risks."
+
+            # --- BRANCH 2: Clinician Overrides and Keeps Active ---
+            else:
+                st.warning("Override logged. Order restored and routing to unit pharmacist.")
+                st.markdown("""
+<p style="color: #d39e00; font-weight: bold; font-size: 13px; margin-bottom: 5px;">1 Order Restored to Active</p>
+<div class="pended-order" style="border-color: #d39e00; background-color: #fff4ce;">
+    <p style="margin: 0; font-size: 13px; font-weight: bold;">
+        <span style="color: #000000;">Quetiapine (SEROQUEL) 25mg Tablet</span>
+    </p>
+    <p style="margin: 0; font-size: 12px; color: #333333;"><strong>Action:</strong> <span style="color: #006600; font-weight: bold;">Continue</span></p>
+    <p style="margin: 0; font-size: 11px; color: #666666;">Route: Oral | Frequency: Nightly</p>
+</div>
+""", unsafe_allow_html=True)
+                
+                if st.button("Re-Apply Auto-Discontinue", key="reapply_btn"):
+                    st.session_state.quetiapine_status = "discontinued"
+                    st.rerun()
+
+                addendum_text = "Quetiapine 25mg was initiated during the hospitalization for acute hyperactive delirium in the setting of sepsis. This medication is being continued at discharge for ***. Please assess for ongoing indication and taper plan at outpatient follow-up."
+
+            # --- SHARED UI: Discharge Summary Text Box ---
             st.markdown("""
 <hr style="margin: 15px 0; border: 0; border-top: 1px solid #dddddd;">
 <p style="color: #000000 !important; font-weight: bold; font-size: 13px; margin-bottom: 5px;">SmartText: Discharge Summary Addendum</p>
@@ -211,8 +242,8 @@ Discharge Orders: Awaiting Signature
             
             st.text_area(
                 "Summary Addendum", 
-                value="Quetiapine 25mg was initiated during the hospitalization for acute hyperactive delirium in the setting of sepsis. As the delirium has fully resolved and cognitive baseline is regained, this medication has been discontinued prior to discharge to mitigate fall risks.",
-                height=90,
+                value=addendum_text,
+                height=110,
                 label_visibility="collapsed"
             )
             
