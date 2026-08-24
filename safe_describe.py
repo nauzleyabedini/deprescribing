@@ -48,19 +48,18 @@ st.markdown("""
         box-shadow: 2px 2px 5px rgba(0,0,0,0.15);
     }
     
-    /* High Contrast Epic Window Title Bars (White text on Deep Blue) */
-    .epic-window-header {
-        background: linear-gradient(to bottom, #336699, #204d74);
+    /* FORCE WHITE TEXT ON BLUE EPIC TITLE BARS */
+    .epic-window-header, .epic-window-header * {
+        background: linear-gradient(to bottom, #336699, #204d74) !important;
         color: #ffffff !important; 
-        font-weight: bold; 
-        padding: 6px 8px; 
-        text-transform: uppercase; 
+        font-weight: bold !important; 
+        text-transform: uppercase !important; 
         font-size: 11px !important; 
-        letter-spacing: 0.5px;
-        border-bottom: 1px solid #122b40;
+        letter-spacing: 0.5px !important;
     }
-    .epic-window-header span, .epic-window-header div {
-        color: #ffffff !important;
+    .epic-window-header {
+        padding: 6px 8px !important;
+        border-bottom: 1px solid #122b40 !important;
     }
     
     .epic-window-body { padding: 10px; background-color: #ffffff; }
