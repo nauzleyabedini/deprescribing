@@ -12,10 +12,15 @@ st.markdown("""
     background-color: #e2e6ea !important;
 }
 
-/* Global text overrides */
-html, body, p, div, span, label, li {
+/* Global text overrides - carefully scoped to avoid breaking Streamlit Icons */
+.stApp, p, label, li, td, th {
     font-family: 'Tahoma', 'Segoe UI', Arial, sans-serif !important;
     color: #000000 !important;
+}
+
+/* Explicitly protect Streamlit's material icons from being overridden */
+.material-symbols-rounded, [data-testid*="Icon"] {
+    font-family: 'Material Symbols Rounded' !important;
 }
 
 header {visibility: hidden;}
@@ -44,6 +49,7 @@ button {
     border-radius: 2px !important; 
     font-weight: bold !important; 
     padding: 4px 10px !important;
+    font-family: 'Tahoma', 'Segoe UI', Arial, sans-serif !important;
 }
 
 /* Secondary Button (Gray/Black) */
@@ -65,7 +71,7 @@ button[kind="primary"] * {
     color: #ffffff !important;
 }
 
-/* SAFE Streamlit Expander Styling - NO padding overrides! */
+/* SAFE Streamlit Expander Styling */
 [data-testid="stExpander"] {
     border: 1px solid #aaaaaa !important;
     border-radius: 3px !important;
@@ -98,7 +104,7 @@ if "reconciled" not in st.session_state:
 
 # --- 2. Storyboard Top Banner (Light Steel Blue) ---
 st.markdown("""
-<div style="background-color: #b9c9d9; padding: 10px 15px; border-bottom: 4px solid #d9534f; margin-top: -50px; margin-bottom: 10px; border-radius: 3px; color: #000000;">
+<div style="background-color: #b9c9d9; padding: 10px 15px; border-bottom: 4px solid #d9534f; margin-top: -50px; margin-bottom: 10px; border-radius: 3px; color: #000000; font-family: Tahoma, sans-serif;">
 <span style="font-weight: bold; font-size: 14px; margin-right: 20px;">DOE, JOHN (M, 78 yo)</span>
 <span style="font-size: 13px; margin-right: 20px;">MRN: 9482011</span>
 <span style="font-size: 13px; margin-right: 20px;">DOB: 11/20/1947</span>
@@ -110,7 +116,7 @@ st.markdown("""
 
 # --- 3. Hyperspace Navigation Tabs ---
 st.markdown("""
-<div style="display: flex; gap: 4px; padding: 0 10px; border-bottom: 2px solid #aaaaaa; margin-bottom: 15px;">
+<div style="display: flex; gap: 4px; padding: 0 10px; border-bottom: 2px solid #aaaaaa; margin-bottom: 15px; font-family: Tahoma, sans-serif;">
 <div style="background-color: #e2e6ea; color: #333333; padding: 6px 15px; border: 1px solid #aaaaaa; border-bottom: none; border-radius: 4px 4px 0 0; font-size: 13px;">Chart Review</div>
 <div style="background-color: #e2e6ea; color: #333333; padding: 6px 15px; border: 1px solid #aaaaaa; border-bottom: none; border-radius: 4px 4px 0 0; font-size: 13px;">Notes</div>
 <div style="background-color: #ffffff; color: #000000; font-weight: bold; padding: 6px 15px; border: 1px solid #aaaaaa; border-bottom: 2px solid #ffffff; border-radius: 4px 4px 0 0; font-size: 13px; position: relative; top: 2px;">Discharge Navigator: Med Rec</div>
@@ -125,7 +131,7 @@ col1, spacer, col2 = st.columns([1.2, 0.05, 1.2])
 with col1:
     with st.container(key="epic_window_1"):
         st.markdown("""
-<div style="background-color: #c9d6e2; color: #000000; font-weight: bold; padding: 8px 12px; border-bottom: 1px solid #888888; font-size: 13px; text-transform: uppercase; margin: -15px -15px 15px -15px;">
+<div style="background-color: #c9d6e2; color: #000000; font-weight: bold; padding: 8px 12px; border-bottom: 1px solid #888888; font-size: 13px; text-transform: uppercase; margin: -15px -15px 15px -15px; font-family: Tahoma, sans-serif;">
 Discharge Medication Reconciliation Grid
 </div>
 <p style="color: #000000; font-size: 13px; margin-top: 0;">Review home and hospital medications prior to generating discharge prescriptions.</p>
@@ -171,7 +177,7 @@ Discharge Medication Reconciliation Grid
 with col2:
     with st.container(key="epic_window_2"):
         st.markdown("""
-<div style="background-color: #c9d6e2; color: #000000; font-weight: bold; padding: 8px 12px; border-bottom: 1px solid #888888; font-size: 13px; text-transform: uppercase; margin: -15px -15px 15px -15px;">
+<div style="background-color: #c9d6e2; color: #000000; font-weight: bold; padding: 8px 12px; border-bottom: 1px solid #888888; font-size: 13px; text-transform: uppercase; margin: -15px -15px 15px -15px; font-family: Tahoma, sans-serif;">
 Discharge Orders: Awaiting Signature
 </div>
 """, unsafe_allow_html=True)
@@ -188,7 +194,7 @@ Discharge Orders: Awaiting Signature
 </div>
 """, unsafe_allow_html=True)
             
-            # The fixed "Pop up bubble" for rationale without broken padding
+            # The rationale expander - icon will now render correctly
             with st.expander("💡 View Auto-Discontinue Rationale"):
                 st.markdown("""
                 <p style="font-size: 12px; color: #333333; margin: 0; padding: 5px;">
