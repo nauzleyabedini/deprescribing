@@ -96,7 +96,6 @@ Discharge Medication Reconciliation Grid
 <p style="color: #000000; font-size: 13px; margin-top: 0;">Review home and hospital medications prior to generating discharge prescriptions.</p>
 """, unsafe_allow_html=True)
         
-        # Dynamic Med Rec Table - Clean styling representing a blind "Continue All"
         if scenario.startswith("1"):
             target_med, source = "Lorazepam 1mg PO BID", "Home Med"
         elif scenario.startswith("2"):
@@ -164,12 +163,10 @@ Discharge Orders: Awaiting Signature
 
                 logs.append("⚡ Generating tailored workflow intervention...")
                 
-                # Render the logs up to the current step
                 current_logs = logs[:st.session_state.trace_step + 1]
                 log_html = "<br>".join([f"> {l}" for l in current_logs])
                 st.markdown(f'<div class="ai-trace-box">{log_html}</div>', unsafe_allow_html=True)
                 
-                # Buttons for click-through control
                 if st.session_state.trace_step < len(logs) - 1:
                     if st.button("Next Step ➔"):
                         st.session_state.trace_step += 1
@@ -221,16 +218,25 @@ Discharge Orders: Awaiting Signature
                         addendum_text = "Quetiapine 12.5mg QHS was initiated 11 days ago for delirium. Delirium is resolved. Medication safely discontinued prior to discharge."
                         avs_text = "We are stopping Seroquel (quetiapine). You might have some trouble sleeping or feel dizzy for a few days. Call your doctor if it does not get better."
                     else: 
-                        st.warning("Override logged.")
-                        st.markdown('<div class="pended-order" style="border-color: #d39e00; background-color: #fff4ce;"><p style="margin: 0; font-size: 13px; font-weight: bold;">Quetiapine (SEROQUEL) 12.5mg Tablet</p><p style="margin: 0; font-size: 12px;"><strong>Action:</strong> <span style="color: #006600; font-weight: bold;">Continue</span></p></div>', unsafe_allow_html=True)
+                        st.error("⚠️ Guideline Warning: Continuing unmonitored antipsychotics requires pharmacy review.")
+                        st.markdown("""
+                        <div class="pended-order" style="border-left: 5px solid #d39e00;">
+                            <p style="margin: 0; font-size: 13px; font-weight: bold; color: #d39e00;">Pharmacy Consult: Antipsychotic Continuation</p>
+                            <p style="margin: 0; font-size: 12px;"><strong>Action:</strong> <span style="color: #d39e00; font-weight: bold;">Review BEFORE Discharge</span></p>
+                        </div>
+                        <div class="pended-order" style="border-color: #d39e00; background-color: #fff4ce;">
+                            <p style="margin: 0; font-size: 13px; font-weight: bold;">Quetiapine (SEROQUEL) 12.5mg Tablet</p>
+                            <p style="margin: 0; font-size: 12px;"><strong>Action:</strong> <span style="color: #006600; font-weight: bold;">Continue</span></p>
+                        </div>
+                        """, unsafe_allow_html=True)
                         if st.button("Re-Apply Auto-Discontinue"):
                             st.session_state.med_status = "discontinued"
                             st.rerun()
-                        addendum_text = "Quetiapine 12.5mg was initiated for delirium. Continued at discharge for ***. Please assess for ongoing indication at outpatient follow-up."
-                        avs_text = "Keep taking Seroquel as directed. Talk to your doctor at your next visit about this medicine."
+                        addendum_text = "Quetiapine 12.5mg was initiated for acute delirium. Medication continuation is being deferred to outpatient for ***. Pharmacy consulted for pre-discharge safety review."
+                        avs_text = "You will keep taking Seroquel (quetiapine) as directed for now. Please talk to your doctor at your next visit about stopping this medicine."
 
                     st.markdown('<hr style="margin: 15px 0; border: 0; border-top: 1px solid #dddddd;"><p style="font-weight: bold; font-size: 13px; margin-bottom: 5px;">Discharge Summary Addendum</p>', unsafe_allow_html=True)
-                    st.text_area("Summary Addendum", value=addendum_text, height=65, label_visibility="collapsed", key="text3_summ")
+                    st.text_area("Summary Addendum", value=addendum_text, height=75, label_visibility="collapsed", key="text3_summ")
                     st.markdown('<p style="font-weight: bold; font-size: 13px; margin-top: 10px; margin-bottom: 5px;">Patient AVS Instructions</p>', unsafe_allow_html=True)
                     st.text_area("AVS Text", value=avs_text, height=65, label_visibility="collapsed", key="text3_avs")
 
@@ -307,7 +313,7 @@ Discharge Orders: Awaiting Signature
                         if st.button("Re-Apply Taper & PCP Handoff"):
                             st.session_state.med_status = "tapered"
                             st.rerun()
-                        addendum_text = "Lorazepam 1mg TID discontinued abruptly. Patient at high risk for withdrawal seizures due to prior history. Please monitor closely outpatient."
+                        addendum_text = "Lorazepam 1mg TID discontinued abruptly due to ***. Patient at high risk for withdrawal seizures due to prior history. Please monitor closely outpatient."
                         avs_text = "We are stopping Ativan today. Go to the ER right away if you have a seizure."
 
                     st.markdown('<hr style="margin: 15px 0; border: 0; border-top: 1px solid #dddddd;"><p style="font-weight: bold; font-size: 13px; margin-bottom: 5px;">Discharge Summary Addendum</p>', unsafe_allow_html=True)
@@ -343,7 +349,7 @@ Discharge Orders: Awaiting Signature
                         if st.button("Re-Apply Pharmacy Consult"):
                             st.session_state.med_status = "pended_consult"
                             st.rerun()
-                        addendum_text = "Alprazolam abruptly discontinued. Monitor for rapid withdrawal symptoms."
+                        addendum_text = "Alprazolam abruptly discontinued due to ***. Patient at risk for rapid dependence withdrawal. Please monitor closely outpatient."
                         avs_text = "We are stopping Alprazolam today. Call your doctor if you feel very anxious or sick."
 
                     st.markdown('<hr style="margin: 15px 0; border: 0; border-top: 1px solid #dddddd;"><p style="font-weight: bold; font-size: 13px; margin-bottom: 5px;">Discharge Summary Addendum</p>', unsafe_allow_html=True)
