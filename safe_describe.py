@@ -1,110 +1,59 @@
 import streamlit as st
 import time
 
-# --- 1. Basic Setup ---
+# --- 1. Basic Setup & State Management ---
 st.set_page_config(layout="wide", page_title="Epic Hyperspace - Discharge Med Rec", initial_sidebar_state="collapsed")
 
-# Injecting CSS for a purely Light-Themed Epic UI
+# Initialize session states for dynamic demo control
+if "reconciled" not in st.session_state:
+    st.session_state.reconciled = False
+if "med_status" not in st.session_state:
+    st.session_state.med_status = "default"
+
+def reset_demo():
+    st.session_state.reconciled = False
+    st.session_state.med_status = "default"
+
+# --- Demo Control Panel (Sidebar) ---
+with st.sidebar:
+    st.markdown("### 🎛️ Demo Control Panel")
+    st.markdown("Select the patient scenario to demonstrate dynamic AI reasoning.")
+    scenario = st.radio(
+        "Patient Scenario:",
+        [
+            "1. Chronic Benzo (Safe to Continue)",
+            "2. Acute Antipsychotic, Low Freq (Auto D/C)",
+            "3. Acute Benzo, High Freq (Auto Taper)"
+        ],
+        on_change=reset_demo
+    )
+
+# --- 2. Injecting CSS for Light-Themed Epic UI ---
 st.markdown("""
 <style>
-/* Force Light Gray App Background */
-.stApp, [data-testid="stAppViewContainer"] {
-    background-color: #e2e6ea !important;
-}
-
-/* Global text overrides - carefully scoped to avoid breaking Streamlit Icons */
-.stApp, p, label, li, td, th {
-    font-family: 'Tahoma', 'Segoe UI', Arial, sans-serif !important;
-    color: #000000 !important;
-}
-
-/* Explicitly protect Streamlit's material icons from being overridden */
-.material-symbols-rounded, [data-testid*="Icon"] {
-    font-family: 'Material Symbols Rounded' !important;
-}
-
+.stApp, [data-testid="stAppViewContainer"] { background-color: #e2e6ea !important; }
+.stApp, p, label, li, td, th { font-family: 'Tahoma', 'Segoe UI', Arial, sans-serif !important; color: #000000 !important; }
+.material-symbols-rounded, [data-testid*="Icon"] { font-family: 'Material Symbols Rounded' !important; }
 header {visibility: hidden;}
 [data-testid="stToolbar"] {display: none;}
-
-/* Table Styling - High Contrast */
-.epic-table {
-    width: 100%; border-collapse: collapse; margin-top: 10px; margin-bottom: 15px; font-size: 13px;
-    background-color: #ffffff;
-}
-.epic-table th {
-    background-color: #e2e6ea !important; color: #000000 !important; 
-    border: 1px solid #999999 !important; padding: 6px; text-align: left; font-weight: bold;
-}
-.epic-table td {
-    border: 1px solid #999999 !important; padding: 8px 6px; color: #000000 !important;
-}
-
-/* Pended Order Box */
-.pended-order {
-    border: 1px solid #aaaaaa; background-color: #f8f9fa; padding: 10px; border-radius: 3px; margin-bottom: 5px;
-}
-
-/* Base Button Styling */
-button {
-    border-radius: 2px !important; 
-    font-weight: bold !important; 
-    padding: 4px 10px !important;
-    font-family: 'Tahoma', 'Segoe UI', Arial, sans-serif !important;
-}
-
-/* Secondary Button (Gray/Black) */
-button[kind="secondary"] {
-    background-color: #f0f2f5 !important; 
-    border: 1px solid #555555 !important; 
-}
-button[kind="secondary"] * {
-    color: #000000 !important;
-}
-
-/* Primary Button (Deep Blue/White) */
-button[kind="primary"] {
-    background-color: #204d74 !important; 
-    border-color: #122b40 !important;
-}
-/* FORCE all elements inside primary button to be white */
-button[kind="primary"] * {
-    color: #ffffff !important;
-}
-
-/* SAFE Streamlit Expander Styling */
-[data-testid="stExpander"] {
-    border: 1px solid #aaaaaa !important;
-    border-radius: 3px !important;
-    margin-top: 5px;
-    margin-bottom: 10px;
-    background-color: #ffffff !important;
-}
-[data-testid="stExpander"] summary {
-    background-color: #f0f2f5 !important;
-}
-[data-testid="stExpander"] summary p {
-    color: #0056b3 !important;
-    font-weight: bold !important;
-}
-
-/* Dockable Workspace Windows */
-[class^="st-key-epic_window_"] {
-    background-color: #ffffff !important;
-    border: 1px solid #888888 !important;
-    border-radius: 0px !important;
-    padding: 15px !important;
-    box-shadow: 2px 2px 5px rgba(0,0,0,0.15);
-}
+.epic-table { width: 100%; border-collapse: collapse; margin-top: 10px; margin-bottom: 15px; font-size: 13px; background-color: #ffffff; }
+.epic-table th { background-color: #e2e6ea !important; color: #000000 !important; border: 1px solid #999999 !important; padding: 6px; text-align: left; font-weight: bold; }
+.epic-table td { border: 1px solid #999999 !important; padding: 8px 6px; color: #000000 !important; }
+.pended-order { border: 1px solid #aaaaaa; background-color: #f8f9fa; padding: 10px; border-radius: 3px; margin-bottom: 5px; }
+button { border-radius: 2px !important; font-weight: bold !important; padding: 4px 10px !important; font-family: 'Tahoma', 'Segoe UI', Arial, sans-serif !important; }
+button[kind="secondary"] { background-color: #f0f2f5 !important; border: 1px solid #555555 !important; }
+button[kind="secondary"] * { color: #000000 !important; }
+button[kind="primary"] { background-color: #204d74 !important; border-color: #122b40 !important; }
+button[kind="primary"] * { color: #ffffff !important; }
+[data-testid="stExpander"] { border: 1px solid #aaaaaa !important; border-radius: 3px !important; margin-top: 5px; margin-bottom: 10px; background-color: #ffffff !important; }
+[data-testid="stExpander"] summary { background-color: #f0f2f5 !important; }
+[data-testid="stExpander"] summary p { color: #0056b3 !important; font-weight: bold !important; }
+[class^="st-key-epic_window_"] { background-color: #ffffff !important; border: 1px solid #888888 !important; border-radius: 0px !important; padding: 15px !important; box-shadow: 2px 2px 5px rgba(0,0,0,0.15); }
+.ai-trace-box { background-color: #1e1e1e; color: #4af626; font-family: 'Courier New', Courier, monospace; font-size: 11px; padding: 12px; border-radius: 4px; line-height: 1.6; margin-bottom: 15px; box-shadow: inset 0 0 10px rgba(0,0,0,0.5); }
 </style>
 """, unsafe_allow_html=True)
 
-# Initialize session state for workflow trigger & dynamic UI state
-if "reconciled" not in st.session_state:
-    st.session_state.reconciled = False
-if "quetiapine_status" not in st.session_state:
-    st.session_state.quetiapine_status = "discontinued"
-
-# --- 2. Storyboard Top Banner (Light Steel Blue) ---
+# --- 3. Storyboard Top Banner ---
 st.markdown("""
 <div style="background-color: #b9c9d9; padding: 10px 15px; border-bottom: 4px solid #d9534f; margin-top: -50px; margin-bottom: 10px; border-radius: 3px; color: #000000; font-family: Tahoma, sans-serif;">
 <span style="font-weight: bold; font-size: 14px; margin-right: 20px;">DOE, JOHN (M, 78 yo)</span>
@@ -116,7 +65,7 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# --- 3. Hyperspace Navigation Tabs ---
+# --- 4. Hyperspace Navigation Tabs ---
 st.markdown("""
 <div style="display: flex; gap: 4px; padding: 0 10px; border-bottom: 2px solid #aaaaaa; margin-bottom: 15px; font-family: Tahoma, sans-serif;">
 <div style="background-color: #e2e6ea; color: #333333; padding: 6px 15px; border: 1px solid #aaaaaa; border-bottom: none; border-radius: 4px 4px 0 0; font-size: 13px;">Chart Review</div>
@@ -126,7 +75,7 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# --- 4. Workspace Layout ---
+# --- 5. Workspace Layout ---
 col1, spacer, col2 = st.columns([1.2, 0.05, 1.2])
 
 # ----- WINDOW 1: Epic Discharge Med Rec Grid -----
@@ -137,27 +86,34 @@ with col1:
 Discharge Medication Reconciliation Grid
 </div>
 <p style="color: #000000; font-size: 13px; margin-top: 0;">Review home and hospital medications prior to generating discharge prescriptions.</p>
+""", unsafe_allow_html=True)
+        
+        # Dynamic Med Rec Table Based on Scenario
+        if "1" in scenario:
+            target_med = "Lorazepam 1mg PO BID"
+            source = "Home Med"
+            row_color = "#ffffff"
+            text_color = "#000000"
+        elif "2" in scenario:
+            target_med = "Quetiapine 25mg PO QHS"
+            source = "<em>New Inpatient Start (HD#3)</em>"
+            row_color = "#ffeaea"
+            text_color = "#aa0000"
+        else:
+            target_med = "Lorazepam 1mg PO TID"
+            source = "<em>New Inpatient Start (HD#2)</em>"
+            row_color = "#ffeaea"
+            text_color = "#aa0000"
 
+        st.markdown(f"""
 <table class="epic-table">
-<tr>
-<th>Medication</th>
-<th>Admission Source</th>
-<th>Discharge Plan</th>
-</tr>
-<tr>
-<td><strong>Lisinopril 10mg</strong> PO Daily</td>
-<td>Home Med</td>
-<td style="color: #006600; font-weight: bold;">[X] Continue</td>
-</tr>
-<tr>
-<td><strong>Metformin 500mg</strong> PO BID</td>
-<td>Home Med</td>
-<td style="color: #006600; font-weight: bold;">[X] Continue</td>
-</tr>
-<tr style="background-color: #ffeaea;">
-<td><strong>Quetiapine 25mg</strong> PO QHS</td>
-<td style="color: #aa0000;"><em>New Inpatient Start (HD#3)</em></td>
-<td style="color: #aa0000; font-weight: bold;">[X] Continue (Auto-selected)</td>
+<tr><th>Medication</th><th>Admission Source</th><th>Discharge Plan</th></tr>
+<tr><td><strong>Lisinopril 10mg</strong> PO Daily</td><td>Home Med</td><td style="color: #006600; font-weight: bold;">[X] Continue</td></tr>
+<tr><td><strong>Metformin 500mg</strong> PO BID</td><td>Home Med</td><td style="color: #006600; font-weight: bold;">[X] Continue</td></tr>
+<tr style="background-color: {row_color};">
+<td><strong>{target_med}</strong></td>
+<td style="color: {text_color};">{source}</td>
+<td style="color: {text_color}; font-weight: bold;">[X] Continue (Auto-selected)</td>
 </tr>
 </table>
 """, unsafe_allow_html=True)
@@ -165,19 +121,16 @@ Discharge Medication Reconciliation Grid
         st.write("") 
         if not st.session_state.reconciled:
             if st.button("Complete Med Rec & Continue to Orders ⚡", type="primary", use_container_width=True):
-                with st.spinner("Processing reconciliation..."):
-                    time.sleep(1.5)
                 st.session_state.reconciled = True
-                st.session_state.quetiapine_status = "discontinued" # Default state on submission
+                st.session_state.med_status = "default"
                 st.rerun()
         else:
             st.success("Med Rec submitted.")
             if st.button("Reset Simulation"):
-                st.session_state.reconciled = False
-                st.session_state.quetiapine_status = "discontinued"
+                reset_demo()
                 st.rerun()
 
-# ----- WINDOW 2: Discharge Orders (Silent Intercept & Override Branching) -----
+# ----- WINDOW 2: Discharge Orders & AI Trace -----
 with col2:
     with st.container(key="epic_window_2"):
         st.markdown("""
@@ -187,69 +140,119 @@ Discharge Orders: Awaiting Signature
 """, unsafe_allow_html=True)
         
         if st.session_state.reconciled:
-            
-            # --- BRANCH 1: AI Defaults to Discontinue (No override yet) ---
-            if st.session_state.quetiapine_status == "discontinued":
-                st.markdown("""
+            # --- AI VISUALIZER ANIMATION (Only runs once upon submission) ---
+            if st.session_state.med_status == "default":
+                trace_box = st.empty()
+                logs = [
+                    "📡 Initializing Qualified Health Agent...",
+                    "🔄 Querying FHIR API: Comparing Pre-Admit MedicationStatement vs Active Inpatient MedicationRequest...",
+                    "✅ Medication Delta Processed.",
+                    "📊 Querying MAR (MedicationAdministration) for 24-hour administration frequency...",
+                    "📄 Fetching DocumentReference: NLP scanning CAM-ICU, Progress, and Consult notes...",
+                    "🧠 Executing Clinical Logic Gate (Chronic vs. Acute / Low Freq vs. High Freq)...",
+                    "⚡ Generating tailored workflow intervention..."
+                ]
+                current_log = ""
+                for log in logs:
+                    current_log += f"> {log}<br>"
+                    trace_box.markdown(f'<div class="ai-trace-box">{current_log}</div>', unsafe_allow_html=True)
+                    time.sleep(0.6)
+                time.sleep(0.5)
+                trace_box.empty() # Clear the logs to show the final UI
+
+            # ==========================================
+            # SCENARIO 1: CHRONIC BENZO (SAFE)
+            # ==========================================
+            if "1" in scenario:
+                st.success("✔️ All orders validated. No safety intercepts required.")
+                st.markdown("<p style='font-size:13px;'>The AI verified via FHIR that Lorazepam 1mg is an established chronic home medication. No deprescribing action or taper plan is required.</p>", unsafe_allow_html=True)
+                
+                st.write("")
+                if st.button("Sign Orders & Close Encounter", type="primary", use_container_width=True):
+                    st.success("Orders signed successfully.")
+
+            # ==========================================
+            # SCENARIO 2: ACUTE LOW FREQ (AUTO D/C)
+            # ==========================================
+            elif "2" in scenario:
+                if st.session_state.med_status in ["default", "discontinued"]:
+                    st.markdown("""
 <p style="color: #006600; font-weight: bold; font-size: 13px; margin-bottom: 5px;">1 Order Pended for Review</p>
 <div class="pended-order">
-    <p style="margin: 0; font-size: 13px; font-weight: bold;">
-        <span style="color: #aa0000; text-decoration: line-through;">Quetiapine (SEROQUEL) 25mg Tablet</span>
-    </p>
+    <p style="margin: 0; font-size: 13px; font-weight: bold;"><span style="color: #aa0000; text-decoration: line-through;">Quetiapine (SEROQUEL) 25mg Tablet</span></p>
     <p style="margin: 0; font-size: 12px; color: #333333;"><strong>Action:</strong> <span style="color: #aa0000; font-weight: bold;">Discontinue</span></p>
     <p style="margin: 0; font-size: 11px; color: #666666;">Route: Oral | Frequency: Nightly</p>
 </div>
 """, unsafe_allow_html=True)
-                
-                with st.expander("💡 View Auto-Discontinue Rationale"):
-                    st.markdown("""
-                    <p style="font-size: 12px; color: #333333; margin: 0; padding: 5px;">
-                    <strong>Qualified Health AI:</strong> Chart review confirms this medication was initiated on HD#3 for <em>Hyperactive ICU Delirium</em>. No chronic psychiatric indication or taper plan was found in prior FHIR history. This medication was auto-pended for discontinuation to mitigate 30-day post-discharge fall risk.
-                    </p>
-                    """, unsafe_allow_html=True)
                     
-                    if st.button("Undo & Keep Active (Route to Pharmacy)", key="undo_btn"):
-                        st.session_state.quetiapine_status = "kept"
-                        st.rerun()
+                    with st.expander("💡 View AI Clinical Rationale (Logic Gate C)"):
+                        st.markdown("<p style='font-size: 12px; margin: 0; padding: 5px;'><strong>Logic Path C Executed:</strong> FHIR delta confirms inpatient start. NLP note analysis confirms initiation for <em>Acute ICU Delirium</em> which is now resolved. MAR check shows low dose/infrequent administration. <strong>Recommendation:</strong> Safe to discontinue abruptly to mitigate post-discharge fall risk.</p>", unsafe_allow_html=True)
+                        if st.button("Undo & Keep Active", key="undo_btn2"):
+                            st.session_state.med_status = "kept"
+                            st.rerun()
+                    
+                    addendum_text = "Quetiapine 25mg was initiated during the hospitalization for acute hyperactive delirium. As the delirium has fully resolved and cognitive baseline is regained, this medication has been discontinued prior to discharge to mitigate fall risks."
 
-                addendum_text = "Quetiapine 25mg was initiated during the hospitalization for acute hyperactive delirium in the setting of sepsis. As the delirium has fully resolved and cognitive baseline is regained, this medication has been discontinued prior to discharge to mitigate fall risks."
-
-            # --- BRANCH 2: Clinician Overrides and Keeps Active ---
-            else:
-                st.warning("Override logged. Order restored and routing to unit pharmacist.")
-                st.markdown("""
-<p style="color: #d39e00; font-weight: bold; font-size: 13px; margin-bottom: 5px;">1 Order Restored to Active</p>
+                else: # Override state
+                    st.warning("Override logged. Routing to unit pharmacist.")
+                    st.markdown("""
 <div class="pended-order" style="border-color: #d39e00; background-color: #fff4ce;">
-    <p style="margin: 0; font-size: 13px; font-weight: bold;">
-        <span style="color: #000000;">Quetiapine (SEROQUEL) 25mg Tablet</span>
-    </p>
+    <p style="margin: 0; font-size: 13px; font-weight: bold;">Quetiapine (SEROQUEL) 25mg Tablet</p>
     <p style="margin: 0; font-size: 12px; color: #333333;"><strong>Action:</strong> <span style="color: #006600; font-weight: bold;">Continue</span></p>
-    <p style="margin: 0; font-size: 11px; color: #666666;">Route: Oral | Frequency: Nightly</p>
 </div>
 """, unsafe_allow_html=True)
-                
-                if st.button("Re-Apply Auto-Discontinue", key="reapply_btn"):
-                    st.session_state.quetiapine_status = "discontinued"
-                    st.rerun()
+                    if st.button("Re-Apply Auto-Discontinue"):
+                        st.session_state.med_status = "discontinued"
+                        st.rerun()
+                    
+                    addendum_text = "Quetiapine 25mg was initiated during the hospitalization for acute hyperactive delirium. This medication is being continued at discharge for ***. Please assess for ongoing indication and taper plan at outpatient follow-up."
 
-                addendum_text = "Quetiapine 25mg was initiated during the hospitalization for acute hyperactive delirium in the setting of sepsis. This medication is being continued at discharge for ***. Please assess for ongoing indication and taper plan at outpatient follow-up."
+                st.markdown('<hr style="margin: 15px 0; border: 0; border-top: 1px solid #dddddd;"><p style="font-weight: bold; font-size: 13px; margin-bottom: 5px;">SmartText: Discharge Summary Addendum</p>', unsafe_allow_html=True)
+                st.text_area("Summary Addendum", value=addendum_text, height=110, label_visibility="collapsed", key="text2")
+                if st.button("Sign Orders & Close Encounter", type="primary", use_container_width=True, key="sign2"):
+                    st.success("Orders signed successfully.")
 
-            # --- SHARED UI: Discharge Summary Text Box ---
-            st.markdown("""
-<hr style="margin: 15px 0; border: 0; border-top: 1px solid #dddddd;">
-<p style="color: #000000 !important; font-weight: bold; font-size: 13px; margin-bottom: 5px;">SmartText: Discharge Summary Addendum</p>
+            # ==========================================
+            # SCENARIO 3: ACUTE HIGH FREQ (AUTO TAPER)
+            # ==========================================
+            elif "3" in scenario:
+                if st.session_state.med_status in ["default", "tapered"]:
+                    st.markdown("""
+<p style="color: #006600; font-weight: bold; font-size: 13px; margin-bottom: 5px;">1 Order Pended for Review</p>
+<div class="pended-order" style="border-left: 5px solid #0056b3;">
+    <p style="margin: 0; font-size: 13px; font-weight: bold; color: #0056b3;">Lorazepam (ATIVAN) Taper Protocol</p>
+    <p style="margin: 0; font-size: 12px; color: #333333;"><strong>Action:</strong> <span style="color: #0056b3; font-weight: bold;">Initiate Outpatient Taper</span></p>
+    <p style="margin: 0; font-size: 11px; color: #666666;">Instructions: Decrease total daily dose by 25% every 7 days until discontinued.</p>
+</div>
+<p style="font-size: 11px; color: #666; font-style: italic; margin-top: -3px;">*Clinical Pharmacist flagged for review.*</p>
 """, unsafe_allow_html=True)
-            
-            st.text_area(
-                "Summary Addendum", 
-                value=addendum_text,
-                height=110,
-                label_visibility="collapsed"
-            )
-            
-            st.write("")
-            if st.button("Sign Orders & Close Encounter", type="primary", use_container_width=True):
-                st.success("Orders signed successfully. Discharge Summary updated.")
-                
+                    
+                    with st.expander("💡 View AI Clinical Rationale (Logic Gate B)"):
+                        st.markdown("<p style='font-size: 12px; margin: 0; padding: 5px;'><strong>Logic Path B Executed:</strong> FHIR confirms inpatient start. MAR analysis reveals high-frequency administration (>2 doses daily for 48+ hours). <strong>Recommendation:</strong> Abrupt discontinuation poses severe withdrawal risk (seizures, rebound anxiety). Auto-pending standard 25% weekly step-down taper and alerting pharmacy.</p>", unsafe_allow_html=True)
+                        if st.button("Undo & Stop Abruptly (Not Recommended)", key="undo_btn3"):
+                            st.session_state.med_status = "abrupt"
+                            st.rerun()
+                    
+                    addendum_text = "Lorazepam 1mg TID was initiated during the hospitalization for acute agitation. Patient received >2 doses daily over the last 48 hours. To mitigate risk of benzodiazepine withdrawal, abrupt discontinuation is contraindicated. A structured taper has been prescribed (decrease total daily dose by 25% every week). Please monitor for signs of withdrawal (tremor, tachycardia, rebound anxiety) and consider prolonging the taper if symptoms occur. Pharmacy notified for discharge coordination."
+
+                else: # Override state (Abrupt Stop)
+                    st.error("⚠️ Warning: Abrupt discontinuation of frequent benzodiazepines carries seizure risk. Override logged.")
+                    st.markdown("""
+<div class="pended-order" style="border-color: #aa0000; background-color: #ffeaea;">
+    <p style="margin: 0; font-size: 13px; font-weight: bold;"><span style="color: #aa0000; text-decoration: line-through;">Lorazepam (ATIVAN) 1mg Tablet</span></p>
+    <p style="margin: 0; font-size: 12px; color: #333333;"><strong>Action:</strong> <span style="color: #aa0000; font-weight: bold;">Discontinue (Abrupt)</span></p>
+</div>
+""", unsafe_allow_html=True)
+                    if st.button("Re-Apply Taper Protocol"):
+                        st.session_state.med_status = "tapered"
+                        st.rerun()
+                    
+                    addendum_text = "Lorazepam 1mg TID was initiated during the hospitalization and is being abruptly discontinued at discharge due to ***. Patient is at elevated risk for benzodiazepine withdrawal. Please monitor closely outpatient."
+
+                st.markdown('<hr style="margin: 15px 0; border: 0; border-top: 1px solid #dddddd;"><p style="font-weight: bold; font-size: 13px; margin-bottom: 5px;">SmartText: Discharge Summary Addendum</p>', unsafe_allow_html=True)
+                st.text_area("Summary Addendum", value=addendum_text, height=130, label_visibility="collapsed", key="text3")
+                if st.button("Sign Orders & Close Encounter", type="primary", use_container_width=True, key="sign3"):
+                    st.success("Orders signed successfully.")
+                    
         else:
             st.info("Awaiting Med Rec submission... Complete the grid on the left to generate discharge orders.")
