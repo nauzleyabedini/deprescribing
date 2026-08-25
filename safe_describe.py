@@ -2,7 +2,8 @@ import streamlit as st
 import time
 
 # --- 1. Basic Setup & State Management ---
-st.set_page_config(layout="wide", page_title="Epic Hyperspace - Discharge Med Rec", initial_sidebar_state="collapsed")
+# Changed initial_sidebar_state to "expanded" so you can see the controls immediately!
+st.set_page_config(layout="wide", page_title="Epic Hyperspace - Discharge Med Rec", initial_sidebar_state="expanded")
 
 # Initialize session states for dynamic demo control
 if "reconciled" not in st.session_state:
