@@ -96,19 +96,19 @@ Discharge Medication Reconciliation Grid
 <p style="color: #000000; font-size: 13px; margin-top: 0;">Review home and hospital medications prior to generating discharge prescriptions.</p>
 """, unsafe_allow_html=True)
         
-        # Dynamic Med Rec Table - ALL styling is identical to simulate a blind "Continue All"
-        if "1" in scenario:
+        # Dynamic Med Rec Table - Clean styling representing a blind "Continue All"
+        if scenario.startswith("1"):
             target_med, source = "Lorazepam 1mg PO BID", "Home Med"
-        elif "2" in scenario:
+        elif scenario.startswith("2"):
             target_med, source = "Haloperidol 0.5mg PO Q4H PRN", "<em>New Inpatient Start (HD#5)</em>"
-        elif "3" in scenario:
+        elif scenario.startswith("3"):
             target_med, source = "Quetiapine 12.5mg PO QHS", "<em>New Inpatient Start (11 days ago)</em>"
-        elif "4" in scenario:
+        elif scenario.startswith("4"):
             target_med, source = "Quetiapine 12.5mg PO Q6H PRN", "<em>New Inpatient Start (5 days ago)</em>"
-        elif "5" in scenario:
+        elif scenario.startswith("5"):
             target_med, source = "Lorazepam 1mg PO TID", "<em>New Inpatient Start (5 days ago)</em>"
         else: # Scenario 6
-            target_med, source = "Alprazolam 0.5mg PO QHS", "<em>New Inpatient Start (2 weeks ago)</em>"
+            target_med, source = "Alprazolam 0.5mg PO TID", "<em>New Inpatient Start (2 weeks ago)</em>"
 
         st.markdown(f"""
 <table class="epic-table">
@@ -149,18 +149,18 @@ Discharge Orders: Awaiting Signature
             if not st.session_state.animation_played:
                 logs = ["📡 Initializing Qualified Health Agent...", "🔄 Querying FHIR API: Evaluating Medication Delta..."]
                 
-                if "1" in scenario:
+                if scenario.startswith("1"):
                     logs.extend(["✅ Match found in pre-admission medication history.", "🧠 Logic Gate: Chronic medication. No intervention required."])
-                elif "2" in scenario:
+                elif scenario.startswith("2"):
                     logs.extend(["📊 MAR check: Administered 3-4x daily.", "📄 NLP scanning Palliative Care consult note...", "✅ Exception found: Patient transitioning to Hospice.", "🧠 Logic Gate: Palliative exception applied. Safe to continue."])
-                elif "3" in scenario:
+                elif scenario.startswith("3"):
                     logs.extend(["📄 NLP note scan: Indication is ICU Delirium.", "📊 MAR check: 12.5mg Scheduled QHS for 11 days.", "🧠 Logic Gate: Short course, low-dose, low discontinuation syndrome risk. Auto-pending abrupt stop."])
-                elif "4" in scenario:
+                elif scenario.startswith("4"):
                     logs.extend(["📊 MAR check: PRN administration (0-2 doses/day) for 5 days.", "🧠 Logic Gate: Below 30-day threshold, infrequent usage. Safe to stop abruptly."])
-                elif "5" in scenario:
+                elif scenario.startswith("5"):
                     logs.extend(["📄 NLP note scan: Indication is Agitation (now resolved).", "⚠️ Problem List scan: Identifying high-risk features...", "🚨 ALERT: History of Seizures identified.", "🧠 Logic Gate: High risk for unmonitored withdrawal. Generating conservative taper and pharmacy consult."])
-                elif "6" in scenario:
-                    logs.extend(["⚠️ Pharmacologic check: Agent is Alprazolam.", "🧠 Logic Gate: High risk of rapid dependence (2-4 weeks). Abrupt stop contraindicated. Routing to pharmacy for long-acting substitution taper."])
+                elif scenario.startswith("6"):
+                    logs.extend(["⚠️ Pharmacologic check: Agent is Alprazolam. Administered TID for 2 weeks.", "🧠 Logic Gate: High risk of rapid dependence given 2-week TID course. Abrupt stop contraindicated. Routing to pharmacy for long-acting substitution taper."])
 
                 logs.append("⚡ Generating tailored workflow intervention...")
                 
@@ -183,7 +183,7 @@ Discharge Orders: Awaiting Signature
                 # ==========================================
                 # SCENARIO 1: CHRONIC BENZO 
                 # ==========================================
-                if "1" in scenario:
+                if scenario.startswith("1"):
                     st.success("✔️ All orders validated. No safety intercepts required.")
                     with st.expander("💡 View AI Clinical Rationale"):
                         st.markdown("<p style='font-size:12px; margin:0; padding:5px;'>The AI verified via FHIR that Lorazepam 1mg is an established chronic home medication pre-hospitalization. No deprescribing action or taper plan is required.</p>", unsafe_allow_html=True)
@@ -194,7 +194,7 @@ Discharge Orders: Awaiting Signature
                 # ==========================================
                 # SCENARIO 2: HALDOL + HOSPICE
                 # ==========================================
-                elif "2" in scenario:
+                elif scenario.startswith("2"):
                     st.success("✔️ All orders validated. Guideline exception applied.")
                     with st.expander("💡 View AI Clinical Rationale (Palliative Exception)"):
                         st.markdown("<p style='font-size:12px; margin:0; padding:5px;'><strong>Inputs Collected:</strong> New inpatient start of Haloperidol 0.5mg PRN. Administered 3-4x daily.<br><strong>Logic Path Executed:</strong> NLP scanning of the Palliative Care consult note confirms the patient is transitioning to Hospice for comfort care. Haloperidol for terminal agitation is a guideline-supported continuation. Deprescribing algorithm safely bypassed.</p>", unsafe_allow_html=True)
@@ -205,7 +205,7 @@ Discharge Orders: Awaiting Signature
                 # ==========================================
                 # SCENARIO 3: QUETIAPINE SCHEDULED (11 DAYS)
                 # ==========================================
-                elif "3" in scenario:
+                elif scenario.startswith("3"):
                     if st.session_state.med_status in ["default", "discontinued"]:
                         st.markdown("""
     <div class="pended-order">
@@ -237,7 +237,7 @@ Discharge Orders: Awaiting Signature
                 # ==========================================
                 # SCENARIO 4: QUETIAPINE PRN (5 DAYS)
                 # ==========================================
-                elif "4" in scenario:
+                elif scenario.startswith("4"):
                     if st.session_state.med_status in ["default", "discontinued"]:
                         st.markdown("""
     <div class="pended-order">
@@ -253,23 +253,32 @@ Discharge Orders: Awaiting Signature
                         addendum_text = "Quetiapine 12.5mg PRN was initiated 5 days ago. Patient used infrequently. Safely discontinued at discharge."
                         avs_text = "We are stopping the as-needed Seroquel (quetiapine) you took in the hospital. You do not need this at home."
                     else: 
-                        st.warning("Override logged.")
-                        st.markdown('<div class="pended-order" style="border-color: #d39e00; background-color: #fff4ce;"><p style="margin: 0; font-size: 13px; font-weight: bold;">Quetiapine (SEROQUEL) 12.5mg Tablet</p><p style="margin: 0; font-size: 12px;"><strong>Action:</strong> <span style="color: #006600; font-weight: bold;">Continue</span></p></div>', unsafe_allow_html=True)
+                        st.error("⚠️ Guideline Warning: Continuing unmonitored antipsychotics requires pharmacy review.")
+                        st.markdown("""
+                        <div class="pended-order" style="border-left: 5px solid #d39e00;">
+                            <p style="margin: 0; font-size: 13px; font-weight: bold; color: #d39e00;">Pharmacy Consult: Antipsychotic Continuation</p>
+                            <p style="margin: 0; font-size: 12px;"><strong>Action:</strong> <span style="color: #d39e00; font-weight: bold;">Review BEFORE Discharge</span></p>
+                        </div>
+                        <div class="pended-order" style="border-color: #d39e00; background-color: #fff4ce;">
+                            <p style="margin: 0; font-size: 13px; font-weight: bold;">Quetiapine (SEROQUEL) 12.5mg Tablet</p>
+                            <p style="margin: 0; font-size: 12px;"><strong>Action:</strong> <span style="color: #006600; font-weight: bold;">Continue</span></p>
+                        </div>
+                        """, unsafe_allow_html=True)
                         if st.button("Re-Apply Auto-Discontinue"):
                             st.session_state.med_status = "discontinued"
                             st.rerun()
-                        addendum_text = "Quetiapine PRN continued at discharge for ***."
-                        avs_text = "Keep taking Seroquel as needed."
+                        addendum_text = "Quetiapine 12.5mg PRN was initiated during the hospitalization for acute delirium. Stopping the medication is being deferred to outpatient for ***. Please assess for ongoing indication and coordinate tapering at outpatient follow-up."
+                        avs_text = "You will keep taking Seroquel (quetiapine) as needed for now. Please talk to your doctor at your next visit about stopping this medicine."
 
                     st.markdown('<hr style="margin: 15px 0; border: 0; border-top: 1px solid #dddddd;"><p style="font-weight: bold; font-size: 13px; margin-bottom: 5px;">Discharge Summary Addendum</p>', unsafe_allow_html=True)
-                    st.text_area("Summary Addendum", value=addendum_text, height=65, label_visibility="collapsed", key="text4_summ")
+                    st.text_area("Summary Addendum", value=addendum_text, height=75, label_visibility="collapsed", key="text4_summ")
                     st.markdown('<p style="font-weight: bold; font-size: 13px; margin-top: 10px; margin-bottom: 5px;">Patient AVS Instructions</p>', unsafe_allow_html=True)
                     st.text_area("AVS Text", value=avs_text, height=65, label_visibility="collapsed", key="text4_avs")
 
                 # ==========================================
                 # SCENARIO 5: LORAZEPAM + SEIZURES (HIGH RISK)
                 # ==========================================
-                elif "5" in scenario:
+                elif scenario.startswith("5"):
                     if st.session_state.med_status in ["default", "tapered"]:
                         st.markdown("""
     <div class="pended-order" style="border-left: 5px solid #0056b3;">
@@ -309,7 +318,7 @@ Discharge Orders: Awaiting Signature
                 # ==========================================
                 # SCENARIO 6: ALPRAZOLAM (RAPID DEPENDENCE)
                 # ==========================================
-                elif "6" in scenario:
+                elif scenario.startswith("6"):
                     if st.session_state.med_status in ["default", "pended_consult"]:
                         st.markdown("""
     <div class="pended-order" style="border-left: 5px solid #d39e00;">
@@ -320,13 +329,13 @@ Discharge Orders: Awaiting Signature
                         with st.expander("💡 View AI Clinical Rationale (Alprazolam)"):
                             st.markdown("""
                             <p style='font-size: 12px; margin: 0; padding: 5px;'>
-                            <strong>Guideline Path 1 (Step 1):</strong> Agent is Alprazolam. Do NOT stop abruptly even after a 2-week course due to risk of rapid dependence. AI recommends routing to pharmacy to consider switching to a longer-acting benzo for a smoother outpatient self-taper.
+                            <strong>Guideline Path 1 (Step 1):</strong> Agent is Alprazolam. Patient was on it for 2 weeks in the hospital at a high frequency (TID). Do NOT stop abruptly due to severe risk of rapid dependence. AI recommends routing to pharmacy to consider switching to a longer-acting benzo for a smoother outpatient self-taper.
                             </p>
                             """, unsafe_allow_html=True)
                             if st.button("Undo & Force Abrupt Stop", key="undo_btn6"):
                                 st.session_state.med_status = "abrupt_stop"
                                 st.rerun()
-                        addendum_text = "Alprazolam 0.5mg QHS initiated 2 weeks ago in ICU. Due to risk of rapid dependence with this specific agent, pharmacy has been consulted prior to discharge to assist with a structured taper plan (considering long-acting transition)."
+                        addendum_text = "Alprazolam 0.5mg TID initiated 2 weeks ago in ICU. Due to risk of rapid dependence with this specific agent and frequency, pharmacy has been consulted prior to discharge to assist with a structured taper plan (considering long-acting transition)."
                         avs_text = "A pharmacist will speak with you before you leave the hospital about a plan to slowly stop your anxiety medicine. Do not stop taking it suddenly on your own."
                     else:
                         st.error("⚠️ Warning: Abrupt stop of Alprazolam carries rapid withdrawal risk.")
@@ -343,7 +352,7 @@ Discharge Orders: Awaiting Signature
                     st.text_area("AVS Text", value=avs_text, height=65, label_visibility="collapsed", key="text6_avs")
 
                 # Shared Sign Orders Button for all branches
-                if "1" not in scenario and "2" not in scenario:
+                if not scenario.startswith("1") and not scenario.startswith("2"):
                     if st.button("Sign Orders & Close Encounter", type="primary", use_container_width=True, key="master_sign"):
                         st.success("Orders signed successfully.")
                         
