@@ -2,7 +2,6 @@ import streamlit as st
 import time
 
 # --- 1. Basic Setup & State Management ---
-# Changed initial_sidebar_state to "expanded" so you can see the controls immediately!
 st.set_page_config(layout="wide", page_title="Epic Hyperspace - Discharge Med Rec", initial_sidebar_state="expanded")
 
 # Initialize session states for dynamic demo control
@@ -10,10 +9,13 @@ if "reconciled" not in st.session_state:
     st.session_state.reconciled = False
 if "med_status" not in st.session_state:
     st.session_state.med_status = "default"
+if "animation_played" not in st.session_state:
+    st.session_state.animation_played = False
 
 def reset_demo():
     st.session_state.reconciled = False
     st.session_state.med_status = "default"
+    st.session_state.animation_played = False
 
 # --- Demo Control Panel (Sidebar) ---
 with st.sidebar:
@@ -141,8 +143,8 @@ Discharge Orders: Awaiting Signature
 """, unsafe_allow_html=True)
         
         if st.session_state.reconciled:
-            # --- AI VISUALIZER ANIMATION (Only runs once upon submission) ---
-            if st.session_state.med_status == "default":
+            # --- AI VISUALIZER ANIMATION (Only runs once!) ---
+            if not st.session_state.animation_played:
                 trace_box = st.empty()
                 logs = [
                     "📡 Initializing Qualified Health Agent...",
@@ -151,29 +153,30 @@ Discharge Orders: Awaiting Signature
                     "📊 Querying MAR (MedicationAdministration) for 24-hour administration frequency...",
                     "📄 Fetching DocumentReference: NLP scanning CAM-ICU, Progress, and Consult notes...",
                     "🧠 Executing Clinical Logic Gate (Chronic vs. Acute / Low Freq vs. High Freq)...",
-                    "⚡ Generating tailored workflow intervention..."
+                    "⚡ Generating tailored workflow intervention and patient instructions..."
                 ]
                 current_log = ""
                 for log in logs:
                     current_log += f"> {log}<br>"
                     trace_box.markdown(f'<div class="ai-trace-box">{current_log}</div>', unsafe_allow_html=True)
-                    time.sleep(0.6)
+                    time.sleep(0.5)
                 time.sleep(0.5)
-                trace_box.empty() # Clear the logs to show the final UI
+                trace_box.empty()
+                st.session_state.animation_played = True 
 
             # ==========================================
             # SCENARIO 1: CHRONIC BENZO (SAFE)
             # ==========================================
             if "1" in scenario:
                 st.success("✔️ All orders validated. No safety intercepts required.")
-                st.markdown("<p style='font-size:13px;'>The AI verified via FHIR that Lorazepam 1mg is an established chronic home medication. No deprescribing action or taper plan is required.</p>", unsafe_allow_html=True)
+                st.markdown("<p style='font-size:13px;'>The AI verified via FHIR that Lorazepam 1mg is an established chronic home medication pre-hospitalization. No deprescribing action or taper plan is required.</p>", unsafe_allow_html=True)
                 
                 st.write("")
                 if st.button("Sign Orders & Close Encounter", type="primary", use_container_width=True):
                     st.success("Orders signed successfully.")
 
             # ==========================================
-            # SCENARIO 2: ACUTE LOW FREQ (AUTO D/C)
+            # SCENARIO 2: ACUTE ANTIPSYCHOTIC (AUTO D/C)
             # ==========================================
             elif "2" in scenario:
                 if st.session_state.med_status in ["default", "discontinued"]:
@@ -186,13 +189,14 @@ Discharge Orders: Awaiting Signature
 </div>
 """, unsafe_allow_html=True)
                     
-                    with st.expander("💡 View AI Clinical Rationale (Logic Gate C)"):
-                        st.markdown("<p style='font-size: 12px; margin: 0; padding: 5px;'><strong>Logic Path C Executed:</strong> FHIR delta confirms inpatient start. NLP note analysis confirms initiation for <em>Acute ICU Delirium</em> which is now resolved. MAR check shows low dose/infrequent administration. <strong>Recommendation:</strong> Safe to discontinue abruptly to mitigate post-discharge fall risk.</p>", unsafe_allow_html=True)
+                    with st.expander("💡 View AI Clinical Rationale"):
+                        st.markdown("<p style='font-size: 12px; margin: 0; padding: 5px;'><strong>Logic Path Executed:</strong> FHIR delta confirms inpatient start. NLP note analysis confirms initiation for <em>Acute ICU Delirium</em> which is now resolved. MAR check shows low dose/infrequent administration. <strong>Recommendation:</strong> Safe to discontinue abruptly to mitigate post-discharge fall risk.</p>", unsafe_allow_html=True)
                         if st.button("Undo & Keep Active", key="undo_btn2"):
                             st.session_state.med_status = "kept"
                             st.rerun()
                     
-                    addendum_text = "Quetiapine 25mg was initiated during the hospitalization for acute hyperactive delirium. As the delirium has fully resolved and cognitive baseline is regained, this medication has been discontinued prior to discharge to mitigate fall risks."
+                    addendum_text = "Quetiapine 25mg was initiated during the hospitalization for acute hyperactive delirium. As the delirium has fully resolved and cognitive baseline is regained, this medication has been discontinued prior to discharge to mitigate fall risks. Patient was instructed on self-monitoring for mild rebound insomnia."
+                    avs_text = "We are stopping the medicine Seroquel (quetiapine) that you took in the hospital. You do not need it anymore. You might have some trouble sleeping, feel sick to your stomach, or feel dizzy for a few days. This is normal and should go away. Call your doctor if you feel very sick or if it does not get better."
 
                 else: # Override state
                     st.warning("Override logged. Routing to unit pharmacist.")
@@ -207,14 +211,19 @@ Discharge Orders: Awaiting Signature
                         st.rerun()
                     
                     addendum_text = "Quetiapine 25mg was initiated during the hospitalization for acute hyperactive delirium. This medication is being continued at discharge for ***. Please assess for ongoing indication and taper plan at outpatient follow-up."
+                    avs_text = "You will keep taking Seroquel (quetiapine) at home. Please talk to your doctor at your next visit to see if you still need this medicine."
 
                 st.markdown('<hr style="margin: 15px 0; border: 0; border-top: 1px solid #dddddd;"><p style="font-weight: bold; font-size: 13px; margin-bottom: 5px;">SmartText: Discharge Summary Addendum</p>', unsafe_allow_html=True)
-                st.text_area("Summary Addendum", value=addendum_text, height=110, label_visibility="collapsed", key="text2")
+                st.text_area("Summary Addendum", value=addendum_text, height=90, label_visibility="collapsed", key="text2_summ")
+                
+                st.markdown('<p style="font-weight: bold; font-size: 13px; margin-top: 10px; margin-bottom: 5px;">SmartText: Patient After Visit Summary (AVS)</p>', unsafe_allow_html=True)
+                st.text_area("AVS Text", value=avs_text, height=85, label_visibility="collapsed", key="text2_avs")
+
                 if st.button("Sign Orders & Close Encounter", type="primary", use_container_width=True, key="sign2"):
                     st.success("Orders signed successfully.")
 
             # ==========================================
-            # SCENARIO 3: ACUTE HIGH FREQ (AUTO TAPER)
+            # SCENARIO 3: ACUTE BENZO (AUTO TAPER)
             # ==========================================
             elif "3" in scenario:
                 if st.session_state.med_status in ["default", "tapered"]:
@@ -228,13 +237,14 @@ Discharge Orders: Awaiting Signature
 <p style="font-size: 11px; color: #666; font-style: italic; margin-top: -3px;">*Clinical Pharmacist flagged for review.*</p>
 """, unsafe_allow_html=True)
                     
-                    with st.expander("💡 View AI Clinical Rationale (Logic Gate B)"):
-                        st.markdown("<p style='font-size: 12px; margin: 0; padding: 5px;'><strong>Logic Path B Executed:</strong> FHIR confirms inpatient start. MAR analysis reveals high-frequency administration (>2 doses daily for 48+ hours). <strong>Recommendation:</strong> Abrupt discontinuation poses severe withdrawal risk (seizures, rebound anxiety). Auto-pending standard 25% weekly step-down taper and alerting pharmacy.</p>", unsafe_allow_html=True)
+                    with st.expander("💡 View AI Clinical Rationale"):
+                        st.markdown("<p style='font-size: 12px; margin: 0; padding: 5px;'><strong>Logic Path Executed:</strong> FHIR confirms inpatient start. MAR analysis reveals high-frequency administration (>2 doses daily for 48+ hours). <strong>Recommendation:</strong> Abrupt discontinuation poses severe withdrawal risk (seizures, rebound anxiety). Auto-pending standard 25% weekly step-down taper and alerting pharmacy for pre-discharge safety review.</p>", unsafe_allow_html=True)
                         if st.button("Undo & Stop Abruptly (Not Recommended)", key="undo_btn3"):
                             st.session_state.med_status = "abrupt"
                             st.rerun()
                     
-                    addendum_text = "Lorazepam 1mg TID was initiated during the hospitalization for acute agitation. Patient received >2 doses daily over the last 48 hours. To mitigate risk of benzodiazepine withdrawal, abrupt discontinuation is contraindicated. A structured taper has been prescribed (decrease total daily dose by 25% every week). Please monitor for signs of withdrawal (tremor, tachycardia, rebound anxiety) and consider prolonging the taper if symptoms occur. Pharmacy notified for discharge coordination."
+                    addendum_text = "Lorazepam 1mg TID was initiated during the hospitalization. Patient received >2 doses daily over the last 48 hours. To mitigate risk of unmonitored benzodiazepine withdrawal, abrupt discontinuation is contraindicated. A structured taper has been prescribed (decrease daily dose by 25% every week). Patient instructed to seek emergency care for severe autonomic symptoms. Pharmacy notified for discharge coordination."
+                    avs_text = "You were given a medicine called Ativan (lorazepam) in the hospital to help you. It is NOT safe to stop taking this all at once. You must slowly take less of it over time.\n\nFollow the new directions on your pill bottle exactly.\n\nCall your doctor if you feel very nervous, shaky, or your heart beats fast.\nGo to the Emergency Room RIGHT AWAY if you have a seizure, see things that are not there, or feel very confused."
 
                 else: # Override state (Abrupt Stop)
                     st.error("⚠️ Warning: Abrupt discontinuation of frequent benzodiazepines carries seizure risk. Override logged.")
@@ -248,10 +258,15 @@ Discharge Orders: Awaiting Signature
                         st.session_state.med_status = "tapered"
                         st.rerun()
                     
-                    addendum_text = "Lorazepam 1mg TID was initiated during the hospitalization and is being abruptly discontinued at discharge due to ***. Patient is at elevated risk for benzodiazepine withdrawal. Please monitor closely outpatient."
+                    addendum_text = "Lorazepam 1mg TID was initiated during the hospitalization and is being abruptly discontinued at discharge due to ***. Patient is at elevated risk for unmonitored benzodiazepine withdrawal. Please monitor closely outpatient."
+                    avs_text = "We are stopping the medicine Ativan (lorazepam) today. Stopping this medicine suddenly can make you feel sick. Go to the Emergency Room RIGHT AWAY if you have a seizure, see things that are not there, or feel very confused."
 
                 st.markdown('<hr style="margin: 15px 0; border: 0; border-top: 1px solid #dddddd;"><p style="font-weight: bold; font-size: 13px; margin-bottom: 5px;">SmartText: Discharge Summary Addendum</p>', unsafe_allow_html=True)
-                st.text_area("Summary Addendum", value=addendum_text, height=130, label_visibility="collapsed", key="text3")
+                st.text_area("Summary Addendum", value=addendum_text, height=90, label_visibility="collapsed", key="text3_summ")
+                
+                st.markdown('<p style="font-weight: bold; font-size: 13px; margin-top: 10px; margin-bottom: 5px;">SmartText: Patient After Visit Summary (AVS)</p>', unsafe_allow_html=True)
+                st.text_area("AVS Text", value=avs_text, height=115, label_visibility="collapsed", key="text3_avs")
+
                 if st.button("Sign Orders & Close Encounter", type="primary", use_container_width=True, key="sign3"):
                     st.success("Orders signed successfully.")
                     
