@@ -224,7 +224,7 @@ Discharge Orders: Awaiting Signature
                         if st.button("Re-Apply Auto-Discontinue"):
                             st.session_state.med_status = "discontinued"
                             st.rerun()
-                        addendum_text = "Quetiapine 12.5mg QHS was initiated for ICU delirium. Against AI recommendation, this is being continued at discharge for ***. Recommend PCP assess for ongoing indication and discontinue as soon as possible, as this is not intended for long-term use."
+                        addendum_text = "Quetiapine 12.5mg QHS was initiated for ICU delirium. This is being continued at discharge for ***. Recommend PCP assess for ongoing indication and discontinue as soon as possible, as this is not intended for long-term use."
                         avs_text = "You will keep taking Seroquel (quetiapine) at home for now. We have set up an appointment with your primary care doctor, during which you should discuss stopping this medicine, as it is not meant for long-term use."
 
                     st.markdown('<hr style="margin: 15px 0; border: 0; border-top: 1px solid #dddddd;"><p style="font-weight: bold; font-size: 13px; margin-bottom: 5px;">Discharge Summary Addendum</p>', unsafe_allow_html=True)
