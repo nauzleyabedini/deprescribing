@@ -261,7 +261,7 @@ Discharge Orders: Awaiting Signature
                         if st.button("Re-Apply Auto-Discontinue"):
                             st.session_state.med_status = "discontinued"
                             st.rerun()
-                        addendum_text = "Quetiapine 12.5mg PRN was initiated for ICU delirium. Against AI recommendation, this is being continued at discharge for ***. PCP to assess for ongoing indication and discontinue as soon as possible, as this is not intended for long-term use."
+                        addendum_text = "Quetiapine 12.5mg PRN was initiated for ICU delirium. This is being continued at discharge for ***. PCP to assess for ongoing indication and discontinue as soon as possible, as this is not intended for long-term use."
                         avs_text = "You will keep taking Seroquel (quetiapine) as needed for now. Please talk to your primary doctor at your next visit about stopping this medicine."
 
                     st.markdown('<hr style="margin: 15px 0; border: 0; border-top: 1px solid #dddddd;"><p style="font-weight: bold; font-size: 13px; margin-bottom: 5px;">Discharge Summary Addendum</p>', unsafe_allow_html=True)
@@ -301,7 +301,7 @@ Discharge Orders: Awaiting Signature
                         if st.button("Re-Apply Taper & PCP Handoff"):
                             st.session_state.med_status = "tapered"
                             st.rerun()
-                        addendum_text = "Lorazepam 1mg TID was initiated for agitation. Against safety warnings, it is being abruptly discontinued at discharge due to ***. Patient is at HIGH RISK for withdrawal seizures due to prior history. PCP to monitor closely."
+                        addendum_text = "Lorazepam 1mg TID was initiated for agitation. It is being discontinued at discharge due to ***. Patient is at HIGH RISK for withdrawal seizures due to prior history. PCP to monitor closely."
                         avs_text = "We are stopping Ativan (lorazepam) today. Because of your health history, stopping suddenly can be dangerous. Go to the Emergency Room RIGHT AWAY if you have a seizure, start shaking, or feel confused."
 
                     st.markdown('<hr style="margin: 15px 0; border: 0; border-top: 1px solid #dddddd;"><p style="font-weight: bold; font-size: 13px; margin-bottom: 5px;">Discharge Summary Addendum</p>', unsafe_allow_html=True)
@@ -337,7 +337,7 @@ Discharge Orders: Awaiting Signature
                         if st.button("Re-Apply Pharmacy Consult"):
                             st.session_state.med_status = "pended_consult"
                             st.rerun()
-                        addendum_text = "Alprazolam 0.5mg TID initiated 2 weeks ago in ICU. Against pharmacy recommendation, it is being abruptly discontinued at discharge for ***. EXPLICIT HANDOFF TO PCP: Patient is at high risk for rapid dependence withdrawal. Please monitor closely."
+                        addendum_text = "Alprazolam 0.5mg TID initiated 2 weeks ago in ICU. It is being discontinued at discharge for ***. Note to PCP: Patient is at high risk for rapid dependence withdrawal. Please monitor closely."
                         avs_text = "We are stopping Alprazolam today. Stopping suddenly can make you feel sick or anxious. Call your doctor right away if you feel very anxious, shaky, or sick."
 
                     st.markdown('<hr style="margin: 15px 0; border: 0; border-top: 1px solid #dddddd;"><p style="font-weight: bold; font-size: 13px; margin-bottom: 5px;">Discharge Summary Addendum</p>', unsafe_allow_html=True)
