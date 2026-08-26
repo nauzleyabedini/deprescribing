@@ -30,7 +30,7 @@ with st.sidebar:
             "2. Haldol PRN + Hospice (Palliative Exception)",
             "3. Quetiapine 12.5mg Scheduled (Low Risk D/C)",
             "4. Quetiapine PRN (Infrequent MAR usage)",
-            "5. Lorazepam + Seizure Hx (High Risk Taper & PCP Handoff)",
+            "5. Lorazepam + Seizure Hx (High Risk Taper)",
             "6. Alprazolam (Rapid Dependence Warning)"
         ],
         on_change=reset_demo
@@ -212,20 +212,20 @@ Discharge Orders: Awaiting Signature
     </div>
     """, unsafe_allow_html=True)
                         with st.expander("💡 View AI Clinical Rationale"):
-                            st.markdown("<p style='font-size: 12px; margin: 0; padding: 5px;'><strong>Guideline Path 3 (Step 1):</strong> Short-term/low-dose use for delirium (11 days). Rebound burden is low at 12.5mg. Because 12.5mg cannot be easily tapered without tablet splitting, an abrupt stop with explicit AVS symptom education is appropriate.</p>", unsafe_allow_html=True)
+                            st.markdown("<p style='font-size: 12px; margin: 0; padding: 5px;'><strong>Guideline Path 3 (Step 1):</strong> Short-term/low-dose use for delirium (11 days). Rebound burden is low at 12.5mg. An abrupt stop with explicit AVS symptom education is appropriate.</p>", unsafe_allow_html=True)
                             if st.button("Undo & Keep Active", key="undo_btn3"):
                                 st.session_state.med_status = "kept"
                                 st.rerun()
-                        addendum_text = "Quetiapine 12.5mg QHS was initiated 11 days ago for delirium. Delirium is resolved. Medication safely discontinued prior to discharge."
-                        avs_text = "We are stopping Seroquel (quetiapine). You might have some trouble sleeping or feel dizzy for a few days. Call your doctor if it does not get better."
+                        addendum_text = "Quetiapine 12.5mg QHS was initiated 11 days ago for delirium. Delirium is resolved. Medication discontinued prior to discharge."
+                        avs_text = "We are stopping Seroquel (quetiapine). You might have some trouble sleeping or feel dizzy for a few days. These symptoms should resolve within 3-5 days. Call your doctor if it does not get better."
                     else: 
                         st.warning("Override logged. PCP Handoff Required.")
                         st.markdown('<div class="pended-order" style="border-color: #d39e00; background-color: #fff4ce;"><p style="margin: 0; font-size: 13px; font-weight: bold;">Quetiapine (SEROQUEL) 12.5mg Tablet</p><p style="margin: 0; font-size: 12px;"><strong>Action:</strong> <span style="color: #006600; font-weight: bold;">Continue</span></p></div>', unsafe_allow_html=True)
                         if st.button("Re-Apply Auto-Discontinue"):
                             st.session_state.med_status = "discontinued"
                             st.rerun()
-                        addendum_text = "Quetiapine 12.5mg QHS was initiated for ICU delirium. Against AI recommendation, this is being continued at discharge for ***. EXPLICIT HANDOFF TO PCP: Please assess for ongoing indication and discontinue as soon as possible, as this is not intended for long-term use."
-                        avs_text = "You will keep taking Seroquel (quetiapine) at home for now. Please make an appointment with your primary care doctor right away to discuss stopping this medicine, as it is not meant for long-term use."
+                        addendum_text = "Quetiapine 12.5mg QHS was initiated for ICU delirium. Against AI recommendation, this is being continued at discharge for ***. Recommend PCP assess for ongoing indication and discontinue as soon as possible, as this is not intended for long-term use."
+                        avs_text = "You will keep taking Seroquel (quetiapine) at home for now. We have set up an appointment with your primary care doctor, during which you should discuss stopping this medicine, as it is not meant for long-term use."
 
                     st.markdown('<hr style="margin: 15px 0; border: 0; border-top: 1px solid #dddddd;"><p style="font-weight: bold; font-size: 13px; margin-bottom: 5px;">Discharge Summary Addendum</p>', unsafe_allow_html=True)
                     st.text_area("Summary Addendum", value=addendum_text, height=100, label_visibility="collapsed", key=f"text3_summ_{st.session_state.med_status}")
@@ -249,7 +249,7 @@ Discharge Orders: Awaiting Signature
                                 st.session_state.med_status = "kept"
                                 st.rerun()
                         addendum_text = "Quetiapine 12.5mg PRN was initiated 5 days ago. Patient used infrequently. Safely discontinued at discharge."
-                        avs_text = "We are stopping the as-needed Seroquel (quetiapine) you took in the hospital. You do not need this at home."
+                        avs_text = "We are stopping the as-needed Seroquel (quetiapine) you took in the hospital. You do not need this at home. You might have some trouble sleeping or feel dizzy for a few days. These symptoms should resolve within 3-5 days. Call your doctor if it does not get better."
                     else: 
                         st.warning("Override logged. PCP Handoff Required.")
                         st.markdown("""
